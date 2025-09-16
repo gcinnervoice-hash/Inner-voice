@@ -12,6 +12,7 @@ interface Message {
   timestamp: string;
 }
 
+
 export default function App() {
   const [messages, setMessages] = useState<Message[]>([
     {
@@ -21,9 +22,10 @@ export default function App() {
       timestamp: "10:30 AM"
     }
   ]);
-  
+
   const [inputValue, setInputValue] = useState("");
   const [isTyping, setIsTyping] = useState(false);
+  const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
   const messagesEndRef = useRef<HTMLDivElement>(null);
 
   const handleSendMessage = () => {
@@ -69,6 +71,11 @@ export default function App() {
     }
   };
 
+  // Handler function for sidebar
+  const handleToggleCollapse = () => {
+    setSidebarCollapsed(!sidebarCollapsed);
+  };
+
   // Auto-scroll to bottom when new messages are added
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
@@ -77,8 +84,11 @@ export default function App() {
   return (
     <div className="h-screen flex">
       {/* Sidebar */}
-      <div className="w-80 border-r border-white/20" style={{ background: 'linear-gradient(135deg, #a8d5a8 0%, #8fbc8f 50%, #7aa87a 100%)' }}>
-        <Sidebar />
+      <div className={`${sidebarCollapsed ? 'w-20' : 'w-80'} border-r border-white/20 transition-all duration-300`} style={{ background: 'linear-gradient(135deg, #a8d5a8 0%, #8fbc8f 50%, #7aa87a 100%)' }}>
+        <Sidebar
+          collapsed={sidebarCollapsed}
+          onToggleCollapse={handleToggleCollapse}
+        />
       </div>
 
       {/* Main Chat Area */}
