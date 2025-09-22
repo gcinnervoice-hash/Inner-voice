@@ -1,6 +1,9 @@
 import { Settings, PanelLeftClose, PanelLeft } from "lucide-react";
 import { Character, CharacterType } from "../types/Character";
 import { SwitchRole } from "./SwitchRole";
+import { SettingsPanel } from "./SettingsPanel";
+import { NatureThemeSelector } from "./NatureThemeSelector";
+import { useThemeClasses, useTheme } from "../contexts/ThemeContext";
 
 interface SidebarProps {
   collapsed: boolean;
@@ -15,6 +18,11 @@ export function Sidebar({
   currentCharacter,
   onCharacterChange
 }: SidebarProps) {
+  const themeClasses = useThemeClasses();
+  const { settings } = useTheme();
+
+  // Use sidebar-specific styles for consistency
+  const sidebarStyles = themeClasses.sidebarStyles;
 
   if (collapsed) {
     return (
@@ -23,10 +31,10 @@ export function Sidebar({
         <div className="p-3">
           <button
             onClick={onToggleCollapse}
-            className="w-full p-2 bg-white/20 hover:bg-white/30 rounded-lg transition-all duration-200 group"
+            className={`w-full p-2 ${sidebarStyles.buttonBg} rounded-lg border ${sidebarStyles.border} hover:scale-[1.02] hover:shadow-md transition-all duration-200`}
             title="Expand sidebar"
           >
-            <PanelLeft className="w-4 h-4 text-white mx-auto group-hover:scale-110 transition-transform" />
+            <PanelLeft className={`w-4 h-4 ${sidebarStyles.textPrimary} mx-auto group-hover:scale-110 transition-transform`} />
           </button>
         </div>
 
@@ -34,6 +42,15 @@ export function Sidebar({
         <SwitchRole
           currentCharacter={currentCharacter}
           onCharacterChange={onCharacterChange}
+          collapsed={true}
+        />
+
+        {/* Nature Theme Selector for Collapsed State */}
+        <NatureThemeSelector collapsed={true} />
+
+        {/* Settings Panel for Collapsed State */}
+        <SettingsPanel
+          currentCharacter={currentCharacter}
           collapsed={true}
         />
       </div>
@@ -44,25 +61,25 @@ export function Sidebar({
     <div className="h-full flex flex-col">
       {/* Spacious Header */}
       <div className="p-6">
-        <div className="bg-white/90 rounded-xl p-6 shadow-sm backdrop-blur-sm">
+        <div className={`rounded-xl p-6 shadow-sm transition-all duration-300 ${sidebarStyles.panelBg} border ${sidebarStyles.border}`}>
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-6">
               <span className="text-5xl">{currentCharacter?.emoji || '🐑'}</span>
               <div>
-                <h2 className="text-xl font-bold text-gray-800">
+                <h2 className={`font-character font-bold transition-all duration-300 ${sidebarStyles.textPrimary} ${sidebarStyles.fontHeading}`}>
                   {currentCharacter?.name || 'Daisy'}
                 </h2>
-                <p className="text-sm text-gray-600 mt-2">
+                <p className={`mt-2 transition-all duration-300 ${sidebarStyles.textSecondary} ${sidebarStyles.fontButton}`}>
                   {currentCharacter?.personality.role || 'Your caring AI companion'}
                 </p>
               </div>
             </div>
             <button
               onClick={onToggleCollapse}
-              className="p-2 hover:bg-gray-200 rounded transition-colors"
+              className={`p-2 rounded-lg transition-all duration-200 ${sidebarStyles.buttonBg} hover:scale-110 hover:shadow-md ${sidebarStyles.textPrimary}`}
               title="Collapse sidebar"
             >
-              <PanelLeftClose className="w-5 h-5 text-gray-600" />
+              <PanelLeftClose className="w-5 h-5" />
             </button>
           </div>
         </div>
@@ -75,12 +92,17 @@ export function Sidebar({
         collapsed={false}
       />
 
-      {/* Settings */}
-      <div className="mt-auto p-6">
-        <button className="w-full flex items-center justify-center gap-3 p-3 bg-white/20 backdrop-blur-sm rounded-lg hover:bg-white/30 transition-all duration-200">
-          <Settings className="w-5 h-5 text-white" />
-          <span className="text-white font-semibold text-sm">Settings</span>
-        </button>
+      {/* Nature Theme Selector for Expanded State with spacing */}
+      <div className="mt-4">
+        <NatureThemeSelector collapsed={false} />
+      </div>
+
+      {/* Settings Panel for Expanded State */}
+      <div className="mt-auto">
+        <SettingsPanel
+          currentCharacter={currentCharacter}
+          collapsed={false}
+        />
       </div>
     </div>
   );

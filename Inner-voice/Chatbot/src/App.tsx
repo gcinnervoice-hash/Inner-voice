@@ -5,13 +5,35 @@ import { SendIcon } from "./components/SendIcon";
 import { Sidebar } from "./components/Sidebar";
 import { CharacterSwitchDialog } from "./components/CharacterSwitchDialog";
 import { Message, Character, CharacterType } from "./types/Character";
-import { getDefaultCharacter, getCharacter } from "./data/characters";
+import { getDefaultCharacter, getCharacter, getCharacterById } from "./data/characters";
 import { getResponseWithTiming, getCharacterIntroduction } from "./utils/responseGenerator";
+import { ThemeProvider, useThemeClasses, useTheme } from "./contexts/ThemeContext";
+import { ErrorBoundary } from "./components/ErrorBoundary";
 
 
-export default function App() {
+// Development debug utility
+const DEBUG = process.env.NODE_ENV === 'development';
+const debugLog = (...args: any[]): void => {
+  if (DEBUG) {
+    console.log('[Inner-Voice Debug]', ...args);
+  }
+};
+
+function AppContent(): JSX.Element {
+  const themeClasses = useThemeClasses();
+  const { settings } = useTheme();
+
   // Character state management
   const [currentCharacter, setCurrentCharacter] = useState<Character>(getDefaultCharacter());
+
+  // Safe character resolution helper to prevent type casting errors
+  const getValidCharacter = (characterId?: string): Character => {
+    if (!characterId) return currentCharacter;
+
+    // Use getCharacterById which safely returns undefined for invalid IDs
+    const foundCharacter = getCharacterById(characterId);
+    return foundCharacter || currentCharacter;
+  };
 
   // Initialize with character-specific introduction
   const [messages, setMessages] = useState<Message[]>(() => {
@@ -40,17 +62,16 @@ export default function App() {
   const messagesEndRef = useRef<HTMLDivElement>(null);
 
   // Character switching function - shows warning dialog first
-  const handleCharacterChange = (characterType: CharacterType) => {
-    console.log('App: handleCharacterChange called with:', characterType);
-    console.log('App: currentCharacter.id:', currentCharacter.id);
+  const handleCharacterChange = (characterType: CharacterType): void => {
+    debugLog('handleCharacterChange called with:', characterType, 'current:', currentCharacter.id);
 
     // Don't show dialog if switching to the same character
     if (characterType === currentCharacter.id) {
-      console.log('App: Same character selected, no change needed');
+      debugLog('Same character selected, no change needed');
       return;
     }
 
-    console.log('App: Showing switch dialog');
+    debugLog('Showing switch dialog for character transition');
     // Show warning dialog and store pending character
     setPendingCharacterType(characterType);
     setShowSwitchDialog(true);
@@ -152,9 +173,22 @@ export default function App() {
   }, [messages, isTyping]);
 
   return (
-    <div className="h-screen flex">
+    <div
+      className={`min-h-screen h-screen max-h-screen flex overflow-hidden nature-theme-transition nature-background-crossfade ${themeClasses.primaryBg}`}
+      style={{
+        background: `${themeClasses.natureStyle.background}`,
+        backgroundSize: 'cover, auto',
+        backgroundBlendMode: 'normal, overlay'
+      }}
+    >
       {/* Sidebar */}
-      <div className={`${sidebarCollapsed ? 'w-20' : 'w-80'} border-r border-white/20 transition-all duration-300`} style={{ background: 'linear-gradient(135deg, #a8d5a8 0%, #8fbc8f 50%, #7aa87a 100%)' }}>
+      <div
+        className={`${sidebarCollapsed ? 'w-20' : 'w-80'} flex-shrink-0 border-r ${themeClasses.cardBorder} nature-theme-transition nature-theme-stagger-1 ${themeClasses.sidebarBg} overflow-hidden`}
+        style={{
+          background: `${themeClasses.natureStyle.sidebarBackground}`,
+          backdropFilter: 'blur(8px)'
+        }}
+      >
         <Sidebar
           collapsed={sidebarCollapsed}
           onToggleCollapse={handleToggleCollapse}
@@ -164,44 +198,91 @@ export default function App() {
       </div>
 
       {/* Main Chat Area */}
-      <div className="flex-1 flex flex-col" style={{ background: 'linear-gradient(135deg, #9fc89f 0%, #8fbc8f 50%, #7fb87f 100%)' }}>
+      <div
+        className={`flex-1 flex flex-col min-w-0 ${themeClasses.chatAreaBg} nature-theme-transition nature-theme-stagger-2`}
+        style={{
+          background: `${themeClasses.natureStyle.chatBackground}`,
+          backgroundSize: 'cover, auto',
+          backdropFilter: 'blur(2px)'
+        }}
+      >
         {/* Messages Area */}
-        <div className="flex-1 overflow-y-auto p-8">
+        <div
+          className="flex-1 overflow-y-auto p-8 min-h-0"
+          role="log"
+          aria-live="polite"
+          aria-label="Chat conversation"
+        >
           <div className="max-w-5xl mx-auto space-y-8">
             {messages.map((message: Message) => (
               <ChatMessage
                 key={message.id}
                 message={message.text}
                 isUser={message.isUser}
-                timestamp={message.timestamp}
+                timestamp={settings.showTimestamps ? message.timestamp : undefined}
                 isThinking={false}
-                character={message.isUser ? undefined : (message.characterId ? getCharacter(message.characterId as CharacterType) : currentCharacter)}
+                character={message.isUser ? undefined : getValidCharacter(message.characterId)}
               />
             ))}
             {isTyping && <TypingIndicator character={currentCharacter} />}
             <div ref={messagesEndRef} />
           </div>
+
+          {/* Screen reader announcements */}
+          <div className="sr-only" aria-live="polite" aria-atomic="true">
+            {isTyping && `${currentCharacter.name} is typing a response...`}
+          </div>
         </div>
 
         {/* Input Area */}
-        <div className="p-8">
+        <div className="flex-shrink-0 p-8" role="form" aria-label="Message input">
           <div className="max-w-5xl mx-auto">
             <div className="flex gap-4 items-center">
+              <label htmlFor="chat-input" className="sr-only">
+                Type your message to {currentCharacter.name}
+              </label>
               <input
+                id="chat-input"
                 type="text"
-                placeholder="Share your thoughts..."
+                placeholder={`Share your thoughts with ${currentCharacter.name}...`}
                 value={inputValue}
                 onChange={(e: React.ChangeEvent<HTMLInputElement>) => setInputValue(e.target.value)}
                 onKeyPress={handleKeyPress}
-                className="flex-1 px-6 py-4 rounded-xl bg-white/95 text-gray-800 placeholder-gray-500 border-none outline-none shadow-lg text-lg font-medium backdrop-blur-sm"
+                disabled={isTyping}
+                aria-describedby="input-help"
+                className={`font-content flex-1 px-6 py-4 rounded-xl border-none outline-none shadow-lg font-medium backdrop-blur-sm nature-theme-transition nature-theme-stagger-3 ${themeClasses.inputBg} ${themeClasses.fontInput} disabled:opacity-50 disabled:cursor-not-allowed`}
+                style={{
+                  background: `${themeClasses.natureStyle.inputBackground}`,
+                  color: `${themeClasses.natureStyle.textColor}`,
+                  borderColor: `${themeClasses.natureStyle.borderColor}`
+                }}
               />
               <button
                 onClick={handleSendMessage}
                 disabled={!inputValue.trim() || isTyping}
-                className="w-14 h-14 bg-white/95 hover:bg-white rounded-xl flex items-center justify-center shadow-lg transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed hover:scale-105 backdrop-blur-sm"
+                type="submit"
+                aria-label={`Send message to ${currentCharacter.name}`}
+                className={`w-14 h-14 rounded-xl flex items-center justify-center shadow-lg nature-theme-transition nature-theme-stagger-4 disabled:opacity-50 disabled:cursor-not-allowed hover:scale-105 backdrop-blur-sm ${themeClasses.buttonBg}`}
+                style={{
+                  background: `${themeClasses.natureStyle.buttonBackground}`,
+                  borderColor: `${themeClasses.natureStyle.borderColor}`
+                }}
+                onMouseEnter={(e) => {
+                  if (!e.currentTarget.disabled) {
+                    e.currentTarget.style.background = themeClasses.natureStyle.buttonHoverBackground;
+                  }
+                }}
+                onMouseLeave={(e) => {
+                  if (!e.currentTarget.disabled) {
+                    e.currentTarget.style.background = themeClasses.natureStyle.buttonBackground;
+                  }
+                }}
               >
                 <SendIcon />
               </button>
+            </div>
+            <div id="input-help" className="sr-only">
+              Press Enter to send your message, or use the Send button
             </div>
           </div>
         </div>
@@ -214,7 +295,19 @@ export default function App() {
         onConfirm={confirmCharacterSwitch}
         currentCharacter={currentCharacter}
         targetCharacter={pendingCharacterType ? getCharacter(pendingCharacterType) : undefined}
+        sidebarCollapsed={sidebarCollapsed}
       />
     </div>
+  );
+}
+
+// Main App component with ErrorBoundary and ThemeProvider wrappers
+export default function App(): JSX.Element {
+  return (
+    <ErrorBoundary>
+      <ThemeProvider>
+        <AppContent />
+      </ThemeProvider>
+    </ErrorBoundary>
   );
 }
