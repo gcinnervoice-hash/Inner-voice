@@ -3,6 +3,7 @@ import { Character, CharacterType } from "../types/Character";
 import { SwitchRole } from "./SwitchRole";
 import { SettingsPanel } from "./SettingsPanel";
 import { NatureThemeSelector } from "./NatureThemeSelector";
+import { Logo } from "./Logo";
 import { useThemeClasses, useTheme } from "../contexts/ThemeContext";
 
 interface SidebarProps {
@@ -53,24 +54,25 @@ export function Sidebar({
           currentCharacter={currentCharacter}
           collapsed={true}
         />
+
       </div>
     );
   }
 
   return (
     <div className="h-full flex flex-col">
-      {/* Spacious Header */}
+      {/* Logo Header */}
       <div className="p-6">
         <div className={`rounded-xl p-6 shadow-sm transition-all duration-300 ${sidebarStyles.panelBg} border ${sidebarStyles.border}`}>
           <div className="flex items-center justify-between">
-            <div className="flex items-center gap-6">
-              <span className="text-5xl">{currentCharacter?.emoji || '🐑'}</span>
+            <div className="flex items-center gap-4">
+              <Logo size="large" showText={false} className="" />
               <div>
                 <h2 className={`font-character font-bold transition-all duration-300 ${sidebarStyles.textPrimary} ${sidebarStyles.fontHeading}`}>
-                  {currentCharacter?.name || 'Daisy'}
+                  Inner Voice
                 </h2>
                 <p className={`mt-2 transition-all duration-300 ${sidebarStyles.textSecondary} ${sidebarStyles.fontButton}`}>
-                  {currentCharacter?.personality.role || 'Your caring AI companion'}
+                  Your AI companion sanctuary
                 </p>
               </div>
             </div>

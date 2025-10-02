@@ -1,5 +1,5 @@
 import React, { useMemo, memo } from 'react';
-import { SheepAvatar } from "./SheepAvatar";
+import { SheepAvatar } from "./avatars/SheepAvatar";
 import { RabbitAvatar } from "./avatars/RabbitAvatar";
 import { FoxAvatar } from "./avatars/FoxAvatar";
 import { Character } from "../types/Character";

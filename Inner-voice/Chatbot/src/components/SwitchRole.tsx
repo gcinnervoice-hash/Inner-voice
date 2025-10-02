@@ -32,7 +32,7 @@ export function SwitchRole({ currentCharacter, onCharacterChange, collapsed = fa
   };
 
   return (
-    <div className={`${collapsed ? 'px-3' : 'px-6'} pb-4`}>
+    <div className={`${collapsed ? 'px-3' : 'px-4'} pb-3`}>
       <div className="space-y-2">
         {!collapsed && (
           <label className={`font-semibold ${sidebarStyles.textPrimary} ${sidebarStyles.fontLabel} opacity-90`}>Switch Role</label>
@@ -42,15 +42,15 @@ export function SwitchRole({ currentCharacter, onCharacterChange, collapsed = fa
           <Select.Trigger className={`
             ${collapsed
               ? 'w-full p-2'
-              : 'w-full p-3'
+              : 'w-full p-2.5'
             }
             ${sidebarStyles.fontButton}
             ${sidebarStyles.buttonBg} rounded-lg
-            flex items-center justify-between gap-2
+            flex items-center justify-between gap-1.5
             border ${sidebarStyles.border}
             ${sidebarStyles.textPrimary} font-semibold
             focus:outline-none focus:ring-2 focus:ring-green-400/50
-            hover:scale-[1.02] hover:shadow-md
+            hover:scale-[1.02] shadow-sm hover:shadow-md transition-all duration-200
           `}>
             <Select.Value>
               <div className="flex items-center gap-2">
@@ -73,7 +73,10 @@ export function SwitchRole({ currentCharacter, onCharacterChange, collapsed = fa
           </Select.Trigger>
 
           <Select.Portal>
-            <Select.Content className={`
+            <Select.Content
+              side={collapsed ? "right" : "bottom"}
+              align="start"
+              className={`
               ${sidebarStyles.panelBg} rounded-lg shadow-xl border ${sidebarStyles.border}
               p-2 z-50 min-w-[200px]
               data-[state=open]:animate-in data-[state=closed]:animate-out

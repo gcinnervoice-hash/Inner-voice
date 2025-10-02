@@ -1,7 +1,8 @@
 {
   "permissions": {
     "allow": [
-      "Bash(rm:*)"
+      "Bash(rm:*)",
+      "Bash(curl -v -X POST http://localhost:5000/api/auth/login -H \"Content-Type: application/json\" -H \"Origin: http://localhost:3001\" -d \"{\"\"email\"\":\"\"test@example.com\"\",\"\"password\"\":\"\"test123\"\"}\")"
     ],
     "deny": [],
     "ask": []

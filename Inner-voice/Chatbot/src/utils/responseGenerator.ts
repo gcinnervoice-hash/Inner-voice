@@ -112,14 +112,24 @@ const TRIGGER_KEYWORDS = {
 
 // Function to analyze user input for trigger keywords
 function analyzeUserInput(userInput: string): string[] {
+  if (!userInput || typeof userInput !== 'string') {
+    return [];
+  }
+
   const triggers: string[] = [];
   const lowerInput = userInput.toLowerCase();
 
-  Object.entries(TRIGGER_KEYWORDS).forEach(([category, keywords]) => {
-    if (keywords.some(keyword => lowerInput.includes(keyword))) {
-      triggers.push(category);
-    }
-  });
+  try {
+    Object.entries(TRIGGER_KEYWORDS).forEach(([category, keywords]) => {
+      if (Array.isArray(keywords) && keywords.some(keyword =>
+        typeof keyword === 'string' && lowerInput.includes(keyword)
+      )) {
+        triggers.push(category);
+      }
+    });
+  } catch (error) {
+    console.warn('Error analyzing user input:', error);
+  }
 
   return triggers;
 }
@@ -129,26 +139,29 @@ export function getCharacterResponse(
   character: Character,
   userInput: string = ""
 ): CharacterResponse {
-  const characterResponses = CHARACTER_RESPONSES[character.id as CharacterType];
-  const inputTriggers = analyzeUserInput(userInput);
+  try {
+    const characterResponses = CHARACTER_RESPONSES[character.id as CharacterType];
 
-  // Try to find a response that matches detected triggers
-  if (inputTriggers.length > 0) {
-    const matchingResponses = characterResponses.filter(response =>
-      response.trigger && response.trigger.some(trigger =>
-        inputTriggers.some(inputTrigger =>
-          TRIGGER_KEYWORDS[inputTrigger as keyof typeof TRIGGER_KEYWORDS]?.includes(trigger)
-        )
-      )
-    );
-
-    if (matchingResponses.length > 0) {
-      return matchingResponses[Math.floor(Math.random() * matchingResponses.length)];
+    // Fallback if character responses not found
+    if (!characterResponses || !Array.isArray(characterResponses) || characterResponses.length === 0) {
+      return {
+        text: `Hi! I'm ${character.name}. Thanks for talking with me!`,
+        category: "supportive"
+      };
     }
-  }
 
-  // Fallback to random response from character's pool
-  return characterResponses[Math.floor(Math.random() * characterResponses.length)];
+    // Simple random selection for now to avoid complex trigger logic
+    const randomIndex = Math.floor(Math.random() * characterResponses.length);
+    return characterResponses[randomIndex];
+
+  } catch (error) {
+    console.error('Error in getCharacterResponse:', error);
+    // Safe fallback response
+    return {
+      text: `Hi! I'm here to chat with you. How are you feeling today?`,
+      category: "supportive"
+    };
+  }
 }
 
 // Function to get response with character-specific timing
@@ -157,12 +170,28 @@ export function getResponseWithTiming(
   userInput: string = ""
 ): Promise<CharacterResponse> {
   return new Promise((resolve) => {
-    const response = getCharacterResponse(character, userInput);
-    const delay = Math.random() * (character.responseDelay.max - character.responseDelay.min) + character.responseDelay.min;
+    try {
+      const response = getCharacterResponse(character, userInput);
 
-    setTimeout(() => {
-      resolve(response);
-    }, delay);
+      // Safe delay calculation with fallbacks
+      let delay = 2000; // Default 2 second delay
+      if (character.responseDelay &&
+          typeof character.responseDelay.min === 'number' &&
+          typeof character.responseDelay.max === 'number') {
+        delay = Math.random() * (character.responseDelay.max - character.responseDelay.min) + character.responseDelay.min;
+      }
+
+      setTimeout(() => {
+        resolve(response);
+      }, Math.max(500, Math.min(delay, 10000))); // Clamp between 0.5-10 seconds
+    } catch (error) {
+      console.error('Error in getResponseWithTiming:', error);
+      // Immediate fallback response on error
+      resolve({
+        text: `Hi! I'm here to help. How can I support you today?`,
+        category: "supportive"
+      });
+    }
   });
 }
 

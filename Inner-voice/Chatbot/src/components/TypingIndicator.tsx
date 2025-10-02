@@ -3,6 +3,7 @@ import { RabbitAvatar } from "./avatars/RabbitAvatar";
 import { FoxAvatar } from "./avatars/FoxAvatar";
 import { Character } from "../types/Character";
 import { getDefaultCharacter } from "../data/characters";
+import { getDefaultTheme } from "../themes/nature-themes";
 
 // Function to render the appropriate avatar based on character
 function renderCharacterAvatar(character: Character, isThinking: boolean): JSX.Element {
@@ -24,6 +25,7 @@ interface TypingIndicatorProps {
 
 export function TypingIndicator({ character }: TypingIndicatorProps): JSX.Element {
   const currentCharacter = character || getDefaultCharacter();
+  const theme = getDefaultTheme();
 
   return (
     <div className="flex gap-6 items-start">
@@ -39,7 +41,12 @@ export function TypingIndicator({ character }: TypingIndicatorProps): JSX.Elemen
             <div className="w-3 h-3 bg-white/60 rounded-full animate-bounce delay-300"></div>
           </div>
         </div>
-        <p className="text-white/80 text-sm font-medium px-2">{currentCharacter.name} is thinking...</p>
+        <p
+          className="text-sm font-medium px-2"
+          style={{ color: theme.colors.textSecondary }}
+        >
+          {currentCharacter.name} is thinking...
+        </p>
       </div>
     </div>
   );

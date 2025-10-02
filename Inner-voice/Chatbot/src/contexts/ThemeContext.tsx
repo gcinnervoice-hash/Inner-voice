@@ -35,7 +35,7 @@ const loadSettingsFromStorage = (): AppSettings => {
       const parsed = JSON.parse(stored);
       // Ensure all required properties exist with fallbacks
       // Validate that the theme is a valid nature theme
-      const validThemes: NatureThemeType[] = ['mountain', 'forest', 'plain'];
+      const validThemes: NatureThemeType[] = ['mountain', 'forest'];
       const themeValue = validThemes.includes(parsed.theme) ? parsed.theme : DEFAULT_SETTINGS.theme;
 
       return {
@@ -102,8 +102,8 @@ export const ThemeProvider: React.FC<ThemeProviderProps> = ({ children }) => {
     }
 
     // Remove existing theme classes
-    root.classList.remove('theme-mountain', 'theme-forest', 'theme-plain');
-    body.classList.remove('theme-mountain', 'theme-forest', 'theme-plain');
+    root.classList.remove('theme-mountain', 'theme-forest');
+    body.classList.remove('theme-mountain', 'theme-forest');
 
     // Add current theme class
     const themeClass = `theme-${settings.theme}`;
@@ -148,6 +148,19 @@ export const ThemeProvider: React.FC<ThemeProviderProps> = ({ children }) => {
     root.style.setProperty('--nature-texture-background', currentTheme.textures.background);
     root.style.setProperty('--nature-texture-overlay', currentTheme.textures.overlay);
     root.style.setProperty('--nature-texture-pattern', currentTheme.textures.pattern);
+
+    // Apply enhanced layered texture properties
+    root.style.setProperty('--nature-texture-layer1', currentTheme.textures.layer1);
+    root.style.setProperty('--nature-texture-layer2', currentTheme.textures.layer2);
+    root.style.setProperty('--nature-texture-layer3', currentTheme.textures.layer3);
+    root.style.setProperty('--nature-texture-grain', currentTheme.textures.grain);
+    root.style.setProperty('--nature-texture-lighting', currentTheme.textures.lighting);
+
+    // Apply effect properties
+    root.style.setProperty('--nature-glow', currentTheme.effects.glow);
+    root.style.setProperty('--nature-glow-intensity', currentTheme.effects.glowIntensity);
+    root.style.setProperty('--nature-shadow', currentTheme.effects.shadow);
+    root.style.setProperty('--nature-shimmer', currentTheme.effects.shimmer);
   }, [settings]);
 
   const contextValue: ThemeContextType = {
@@ -213,17 +226,6 @@ export const useThemeClasses = () => {
           cardBg: 'bg-green-800/90',
           border: 'border-green-600',
           accent: 'text-amber-400',
-        };
-      case 'plain':
-        return {
-          primary: 'text-gray-900',
-          secondary: 'text-gray-700',
-          muted: 'text-gray-600',
-          primaryBg: 'bg-yellow-50',
-          surfaceBg: 'bg-amber-50',
-          cardBg: 'bg-amber-50/95',
-          border: 'border-amber-200',
-          accent: 'text-green-600',
         };
       default:
         return {
