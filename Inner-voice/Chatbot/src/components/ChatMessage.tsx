@@ -38,20 +38,18 @@ const ChatMessageComponent = ({ message, isUser, timestamp, isThinking = false, 
   // Use unified font size system - messages get large text for readability
   const fontSizeClass = themeClasses.fontMessage;
 
-  // Memoized message styling with proper character theme integration
+  // Unified message styling based on theme
   const messageClasses = useMemo(() => {
-    if (isUser) {
-      return `${themeClasses.cardBg} ${themeClasses.primaryText} border ${themeClasses.cardBorder}`;
-    } else {
-      // Character theme integration with fallback handling
-      const isDarkTheme = settings.theme === 'forest'; // Forest is our dark theme
-      const characterBg = currentCharacter?.colorTheme?.messageBackground || themeClasses.cardBg;
-      const characterBorder = currentCharacter?.colorTheme?.messageBorder || themeClasses.cardBorder;
+    const isForestTheme = settings.theme === 'forest';
 
-      // Apply character theming with theme adaptation and null safety
-      return `${characterBg} ${themeClasses.primaryText} border ${characterBorder} backdrop-blur-sm${isDarkTheme ? ' opacity-90' : ''}`;
+    if (isForestTheme) {
+      // Forest theme: deep green background with white text
+      return 'bg-emerald-800/90 text-white border border-emerald-700/50 backdrop-blur-sm';
+    } else {
+      // Mountain theme: white background with black text
+      return 'bg-white/95 text-gray-900 border border-gray-200/50 backdrop-blur-sm';
     }
-  }, [isUser, themeClasses, currentCharacter?.colorTheme, settings.theme]);
+  }, [settings.theme]);
 
   // Memoized layout classes
   const layoutClasses = useMemo(() => ({
