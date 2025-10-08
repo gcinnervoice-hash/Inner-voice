@@ -1,4 +1,4 @@
-import React, { useState, useRef, useEffect, useCallback, useMemo, memo } from "react";
+ import React, { useState, useRef, useEffect, useCallback, useMemo, memo } from "react";
 import { ChatMessage } from "./components/ChatMessage";
 import { TypingIndicator } from "./components/TypingIndicator";
 import { SendIcon } from "./components/SendIcon";
@@ -68,6 +68,7 @@ function AppContent(): JSX.Element {
   const [pendingCharacterType, setPendingCharacterType] = useState<CharacterType | null>(null);
 
   const messagesEndRef = useRef<HTMLDivElement>(null);
+  const inputRef = useRef<HTMLInputElement>(null);
 
   // Character switching function - shows warning dialog first - wrapped in useCallback
   const handleCharacterChange = useCallback((characterType: CharacterType): void => {
@@ -227,6 +228,10 @@ function AppContent(): JSX.Element {
       setMessages((prev: Message[]) => [...prev, fallbackResponse]);
     } finally {
       setIsTyping(false);
+      // Refocus input after response is complete
+      requestAnimationFrame(() => {
+        inputRef.current?.focus();
+      });
     }
   }, [inputValue, currentCharacter, sessionId, useRealAPI]);
 
@@ -242,9 +247,18 @@ function AppContent(): JSX.Element {
     setSidebarCollapsed(!sidebarCollapsed);
   }, [sidebarCollapsed]);
 
-  // Auto-scroll to bottom when new messages are added - optimized to use length
+  // Auto-scroll to bottom when new messages are added (only if user is near bottom)
   useEffect(() => {
-    messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
+    const scrollContainer = messagesEndRef.current?.parentElement;
+    if (!scrollContainer) return;
+
+    // Check if user is near the bottom (within 100px)
+    const isNearBottom = scrollContainer.scrollHeight - scrollContainer.scrollTop - scrollContainer.clientHeight < 100;
+
+    // Only auto-scroll if user is near the bottom or it's the first message
+    if (isNearBottom || messages.length === 1) {
+      messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
+    }
   }, [messages.length, isTyping]);
 
   // Handle logout
@@ -273,7 +287,7 @@ function AppContent(): JSX.Element {
 
   return (
     <div
-      className={`min-h-screen h-screen max-h-screen flex overflow-hidden nature-theme-transition nature-background-crossfade bg-layered ${themeClasses.primaryBg}`}
+      className={`h-screen w-screen flex overflow-hidden nature-theme-transition nature-background-crossfade bg-layered ${themeClasses.primaryBg}`}
       style={{
         background: `
           var(--nature-texture-lighting),
@@ -284,7 +298,9 @@ function AppContent(): JSX.Element {
         `,
         backgroundSize: 'cover, cover, cover, cover, cover',
         backgroundPosition: 'center, center, center, center, center',
-        backgroundBlendMode: 'soft-light, overlay, normal, normal, normal'
+        backgroundBlendMode: 'soft-light, overlay, normal, normal, normal',
+        position: 'fixed',
+        inset: 0
       }}
     >
       {/* Grain texture overlay */}
@@ -300,9 +316,13 @@ function AppContent(): JSX.Element {
       <div
         className={`${sidebarCollapsed ? 'w-20' : 'w-80'} flex-shrink-0 border-r ${themeClasses.cardBorder} nature-theme-transition nature-theme-stagger-1 ${themeClasses.sidebarBg} overflow-hidden glass-panel-strong relative z-10`}
         style={{
-          background: `${themeClasses.natureStyle.sidebarBackground}`,
-          backdropFilter: 'blur(16px) saturate(180%)',
-          boxShadow: 'var(--nature-shadow)'
+          background: `
+            var(--nature-texture-overlay),
+            var(--nature-gradient-chat-area)
+          `,
+          backgroundSize: 'cover, cover',
+          backdropFilter: 'blur(4px) saturate(120%)',
+          borderColor: `${themeClasses.natureStyle.borderColor}`
         }}
       >
         <Sidebar
@@ -315,7 +335,7 @@ function AppContent(): JSX.Element {
 
       {/* Main Chat Area */}
       <div
-        className={`flex-1 flex flex-col min-w-0 ${themeClasses.chatAreaBg} nature-theme-transition nature-theme-stagger-2 relative z-10`}
+        className={`flex-1 flex flex-col min-w-0 min-h-0 ${themeClasses.chatAreaBg} nature-theme-transition nature-theme-stagger-2 relative z-10`}
         style={{
           background: `
             var(--nature-texture-overlay),
@@ -327,24 +347,26 @@ function AppContent(): JSX.Element {
       >
         {/* Messages Area */}
         <div
-          className="flex-1 overflow-y-auto p-8 min-h-0"
+          className="flex-1 p-8 min-h-0 overflow-hidden"
           role="log"
           aria-live="polite"
           aria-label="Chat conversation"
         >
-          <div className="max-w-5xl mx-auto space-y-8">
-            {messages.map((message: Message) => (
-              <ChatMessage
-                key={message.id}
-                message={message.text}
-                isUser={message.isUser}
-                timestamp={settings.showTimestamps ? message.timestamp : undefined}
-                isThinking={false}
-                character={message.isUser ? undefined : getValidCharacter(message.characterId)}
-              />
-            ))}
-            {isTyping && <TypingIndicator character={currentCharacter} />}
-            <div ref={messagesEndRef} />
+          <div className="h-full overflow-y-auto overflow-x-hidden">
+            <div className="max-w-5xl mx-auto space-y-8">
+              {messages.map((message: Message) => (
+                <ChatMessage
+                  key={message.id}
+                  message={message.text}
+                  isUser={message.isUser}
+                  timestamp={settings.showTimestamps ? message.timestamp : undefined}
+                  isThinking={false}
+                  character={message.isUser ? undefined : getValidCharacter(message.characterId)}
+                />
+              ))}
+              {isTyping && <TypingIndicator character={currentCharacter} />}
+              <div ref={messagesEndRef} />
+            </div>
           </div>
 
           {/* Screen reader announcements */}
@@ -361,6 +383,7 @@ function AppContent(): JSX.Element {
                 Type your message to {currentCharacter.name}
               </label>
               <input
+                ref={inputRef}
                 id="chat-input"
                 type="text"
                 placeholder={`Share your thoughts with ${currentCharacter.name}...`}
@@ -369,13 +392,11 @@ function AppContent(): JSX.Element {
                 onKeyPress={handleKeyPress}
                 disabled={isTyping}
                 aria-describedby="input-help"
-                className={`font-content flex-1 px-6 py-4 rounded-xl border-none outline-none font-medium nature-theme-transition nature-theme-stagger-3 ${themeClasses.inputBg} ${themeClasses.fontInput} disabled:opacity-50 disabled:cursor-not-allowed glass-panel texture-organic`}
+                className={`font-content flex-1 px-6 py-4 rounded-xl border outline-none font-medium ${themeClasses.fontInput} disabled:opacity-50 disabled:cursor-not-allowed`}
                 style={{
                   background: `${themeClasses.natureStyle.inputBackground}`,
                   color: `${themeClasses.natureStyle.textColor}`,
-                  borderColor: `${themeClasses.natureStyle.borderColor}`,
-                  boxShadow: 'var(--nature-shadow)',
-                  backdropFilter: 'blur(12px) saturate(150%)'
+                  borderColor: `${themeClasses.natureStyle.borderColor}`
                 }}
               />
               <button
@@ -383,24 +404,10 @@ function AppContent(): JSX.Element {
                 disabled={!inputValue.trim() || isTyping}
                 type="submit"
                 aria-label={`Send message to ${currentCharacter.name}`}
-                className={`w-14 h-14 rounded-xl flex items-center justify-center nature-theme-transition nature-theme-stagger-4 disabled:opacity-50 disabled:cursor-not-allowed hover:scale-110 glass-panel-strong glow-ambient animate-breathe ${themeClasses.buttonBg}`}
+                className={`w-14 h-14 rounded-xl border flex items-center justify-center disabled:opacity-50 disabled:cursor-not-allowed hover:opacity-80 transition-opacity ${themeClasses.buttonBg}`}
                 style={{
-                  background: `var(--nature-shimmer), ${themeClasses.natureStyle.buttonBackground}`,
-                  borderColor: `${themeClasses.natureStyle.borderColor}`,
-                  boxShadow: 'var(--nature-glow-intensity)',
-                  backdropFilter: 'blur(16px) saturate(180%)'
-                }}
-                onMouseEnter={(e) => {
-                  if (!e.currentTarget.disabled) {
-                    e.currentTarget.style.background = `var(--nature-shimmer), ${themeClasses.natureStyle.buttonHoverBackground}`;
-                    e.currentTarget.style.boxShadow = 'var(--nature-glow-intensity), 0 0 40px var(--nature-glow)';
-                  }
-                }}
-                onMouseLeave={(e) => {
-                  if (!e.currentTarget.disabled) {
-                    e.currentTarget.style.background = `var(--nature-shimmer), ${themeClasses.natureStyle.buttonBackground}`;
-                    e.currentTarget.style.boxShadow = 'var(--nature-glow-intensity)';
-                  }
+                  background: `${themeClasses.natureStyle.buttonBackground}`,
+                  borderColor: `${themeClasses.natureStyle.borderColor}`
                 }}
               >
                 <SendIcon />

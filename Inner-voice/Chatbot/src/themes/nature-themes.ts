@@ -114,11 +114,11 @@ export const NATURE_THEMES: Record<NatureThemeType, NatureTheme> = {
       text: '#F9FAFB',         // Light text
       textSecondary: '#D1FAE5', // Light green
       textMuted: '#6EE7B7',    // Muted green
-      border: '#047857',       // Forest border
+      border: '#000000',       // Black border
     },
     gradients: {
       primary: 'linear-gradient(180deg, #0A5D47 0%, #064E3B 30%, #053B2F 60%, #042F26 100%)',
-      sidebar: 'linear-gradient(180deg, rgba(4, 120, 87, 0.95) 0%, rgba(6, 95, 70, 0.98) 100%)',
+      sidebar: 'linear-gradient(135deg, #064E3B 0%, #053B2F 50%, #042F26 100%)',
       chatArea: 'linear-gradient(135deg, #064E3B 0%, #053B2F 50%, #042F26 100%)',
       card: 'rgba(4, 120, 87, 0.85)',
       input: 'rgba(6, 95, 70, 0.92)',

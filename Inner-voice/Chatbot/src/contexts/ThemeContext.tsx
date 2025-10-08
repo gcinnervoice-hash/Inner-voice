@@ -224,7 +224,7 @@ export const useThemeClasses = () => {
           primaryBg: 'bg-green-900',
           surfaceBg: 'bg-green-800',
           cardBg: 'bg-green-800/90',
-          border: 'border-green-600',
+          border: 'border-black',
           accent: 'text-amber-400',
         };
       default:
@@ -235,7 +235,7 @@ export const useThemeClasses = () => {
           primaryBg: 'bg-green-900',
           surfaceBg: 'bg-green-800',
           cardBg: 'bg-green-800/90',
-          border: 'border-green-600',
+          border: 'border-black',
           accent: 'text-amber-400',
         };
     }

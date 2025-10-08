@@ -128,7 +128,7 @@ export function CharacterSwitchDialog({
 
       {/* Cute Dialog Container - Right of Sidebar */}
       <div
-        className="relative transform transition-all duration-500 ease-out animate-in fade-in-0 scale-in-95 slide-in-from-left-4 max-w-md lg:max-w-lg animate-bounce"
+        className="relative max-w-md lg:max-w-lg"
         style={{
           marginLeft: `${leftMargin}px`,
           marginRight: `${spacing}px`,
@@ -140,7 +140,7 @@ export function CharacterSwitchDialog({
         onClick={(e) => e.stopPropagation()}
       >
         <div
-          className="p-6 md:p-8 w-full transition-all duration-300 hover:scale-[1.01]"
+          className="p-6 md:p-8 w-full"
           style={{
             borderRadius: '20px',
             border: `3px solid ${characterTheme?.borderColor || 'rgba(255, 182, 193, 0.6)'}`,
@@ -161,23 +161,20 @@ export function CharacterSwitchDialog({
             {/* Cute title with sparkles */}
             <div className="mb-4">
               <h2 className="text-lg font-bold text-gray-700 flex items-center justify-center gap-2">
-                <span className="text-yellow-400 animate-pulse">✨</span>
+                <span className="text-yellow-400">✨</span>
                 <span>Character Switch</span>
-                <span className="text-yellow-400 animate-pulse">✨</span>
+                <span className="text-yellow-400">✨</span>
               </h2>
               <p className="text-sm text-gray-500 mt-1">Choose your new companion! 🌟</p>
             </div>
 
             <div className="flex items-center justify-center gap-4 md:gap-6 mb-4">
-              <div className="flex flex-col items-center gap-2 transition-all duration-300 group">
+              <div className="flex flex-col items-center gap-2">
                 <div className="relative">
-                  <div className="w-16 h-16 rounded-full bg-gradient-to-br from-pink-100 to-blue-100 flex items-center justify-center shadow-lg border-4 border-white/80 transition-all duration-300 group-hover:scale-110 group-hover:rotate-6">
-                    <span className="text-3xl animate-bounce" aria-label={`Current character: ${currentCharacter?.name || 'Daisy'}`}>
+                  <div className="w-16 h-16 rounded-full bg-gradient-to-br from-pink-100 to-blue-100 flex items-center justify-center shadow-lg border-4 border-white/80">
+                    <span className="text-3xl" aria-label={`Current character: ${currentCharacter?.name || 'Daisy'}`}>
                       {currentCharacter?.emoji || '🐑'}
                     </span>
-                  </div>
-                  <div className="absolute -top-1 -right-1 w-4 h-4 bg-red-400 rounded-full flex items-center justify-center text-xs animate-pulse">
-                    💭
                   </div>
                 </div>
                 <span className="text-gray-600 text-sm font-semibold bg-white/60 px-3 py-1 rounded-full">
@@ -186,27 +183,24 @@ export function CharacterSwitchDialog({
               </div>
 
               <div className="flex flex-col items-center gap-2">
-                <div className="w-10 h-10 bg-gradient-to-r from-pink-200 to-purple-200 rounded-full flex items-center justify-center animate-bounce">
-                  <span className="text-lg">💫</span>
+                <div className="w-10 h-10 bg-gradient-to-r from-pink-200 to-purple-200 rounded-full flex items-center justify-center">
+                  <span className="text-lg">→</span>
                 </div>
-                <span className="text-xs text-gray-500 font-medium bg-white/40 px-2 py-1 rounded-full">switching to</span>
+                <span className="text-xs text-gray-500 font-medium bg-white/40 px-2 py-1 rounded-full">to</span>
               </div>
 
-              <div className="flex flex-col items-center gap-2 transition-all duration-300 group">
+              <div className="flex flex-col items-center gap-2">
                 <div className="relative">
                   <div
-                    className="w-16 h-16 rounded-full flex items-center justify-center transition-all duration-300 group-hover:scale-110 group-hover:-rotate-6 border-4 border-white/80 animate-pulse"
+                    className="w-16 h-16 rounded-full flex items-center justify-center border-4 border-white/80"
                     style={{
                       background: `linear-gradient(135deg, rgba(255, 255, 255, 0.9) 0%, ${characterTheme?.cardBg || 'rgba(255, 182, 193, 0.3)'} 100%)`,
                       boxShadow: `0 8px 25px ${characterTheme?.borderColor || 'rgba(255, 182, 193, 0.4)'}`
                     }}
                   >
-                    <span className="text-3xl animate-bounce" aria-label={`Target character: ${targetCharacter.name}`}>
+                    <span className="text-3xl" aria-label={`Target character: ${targetCharacter.name}`}>
                       {targetCharacter.emoji}
                     </span>
-                  </div>
-                  <div className="absolute -top-1 -right-1 w-5 h-5 bg-yellow-400 rounded-full flex items-center justify-center text-xs animate-spin">
-                    ⭐
                   </div>
                 </div>
                 <span className="text-gray-600 text-sm font-bold bg-gradient-to-r from-white/80 to-white/60 px-3 py-1 rounded-full shadow-sm">
@@ -228,17 +222,15 @@ export function CharacterSwitchDialog({
           {/* Cute Character Context Information */}
           <div className="mb-5 md:mb-6">
             <div
-              className="rounded-3xl p-4 md:p-5 transition-all duration-200 hover:scale-[1.02] border-2 border-white/50"
+              className="rounded-3xl p-4 md:p-5 border-2 border-white/50"
               style={{
                 background: `linear-gradient(135deg, rgba(255, 255, 255, 0.8) 0%, ${characterTheme?.cardBg || 'rgba(255, 182, 193, 0.2)'} 100%)`,
                 boxShadow: '0 8px 32px rgba(0, 0, 0, 0.1), inset 0 1px 0 rgba(255, 255, 255, 0.8)'
               }}
             >
               <h4 className="text-gray-700 font-bold text-lg mb-3 text-center flex items-center justify-center gap-2">
-                <span className="animate-bounce">🌟</span>
                 <span>Meet {targetCharacter.name}</span>
                 <span className="text-2xl">{targetCharacter.emoji}</span>
-                <span className="animate-bounce">🌟</span>
               </h4>
               <div className="space-y-3">
                 <div className="bg-white/60 rounded-2xl p-3 text-center">
@@ -259,11 +251,9 @@ export function CharacterSwitchDialog({
 
           {/* Cute Warning Message */}
           <div className="mb-5 md:mb-6">
-            <div className="rounded-3xl p-4 text-center transition-all duration-200 hover:scale-[1.02] bg-gradient-to-r from-yellow-100 to-orange-100 border-2 border-yellow-200 shadow-lg">
+            <div className="rounded-3xl p-4 text-center bg-gradient-to-r from-yellow-100 to-orange-100 border-2 border-yellow-200 shadow-lg">
               <p className="text-orange-600 text-sm font-medium flex items-center justify-center gap-2">
-                <span className="text-lg animate-pulse">🔄</span>
                 <span>Starting a fresh new chat with {targetCharacter.name}!</span>
-                <span className="text-lg animate-pulse">💫</span>
               </p>
               <p className="text-xs text-orange-500 mt-1">Don't worry, your friendship continues! 🤗</p>
             </div>
@@ -274,30 +264,26 @@ export function CharacterSwitchDialog({
             <button
               type="button"
               onClick={handleClose}
-              className="flex-1 px-6 py-4 text-sm text-gray-600 hover:text-gray-700 font-semibold transition-all duration-300 rounded-3xl cursor-pointer hover:scale-[1.05] bg-gradient-to-r from-gray-100 to-gray-200 hover:from-gray-200 hover:to-gray-300 border-2 border-gray-300 shadow-lg hover:shadow-xl"
+              className="flex-1 px-6 py-4 text-sm text-gray-600 hover:text-gray-700 font-semibold rounded-3xl cursor-pointer bg-gradient-to-r from-gray-100 to-gray-200 hover:from-gray-200 hover:to-gray-300 border-2 border-gray-300 shadow-lg"
               aria-label="Keep current conversation"
             >
               <span className="flex items-center justify-center gap-2">
-                <span className="text-lg animate-pulse" aria-hidden="true">🏠</span>
                 <span>Stay Here</span>
               </span>
             </button>
             <button
               type="button"
               onClick={handleConfirm}
-              className="flex-1 px-6 py-4 text-sm text-white font-bold rounded-3xl transition-all duration-300 cursor-pointer hover:scale-[1.05] hover:shadow-2xl border-2 border-white/50 relative overflow-hidden"
+              className="flex-1 px-6 py-4 text-sm text-white font-bold rounded-3xl cursor-pointer border-2 border-white/50"
               style={{
                 background: characterTheme?.buttonBg || 'linear-gradient(135deg, rgba(255, 105, 180, 0.9) 0%, rgba(255, 20, 147, 0.9) 100%)',
                 boxShadow: '0 8px 32px rgba(255, 105, 180, 0.4)'
               }}
               aria-label={`Start new conversation with ${targetCharacter.name}`}
             >
-              <span className="flex items-center justify-center gap-2 relative z-10">
-                <span className="text-lg animate-bounce" aria-hidden="true">{targetCharacter.emoji}</span>
+              <span className="flex items-center justify-center gap-2">
                 <span>Let's Go!</span>
-                <span className="text-lg animate-pulse" aria-hidden="true">🚀</span>
               </span>
-              <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/20 to-transparent transform -skew-x-12 -translate-x-full group-hover:translate-x-full transition-transform duration-1000"></div>
             </button>
           </div>
         </div>

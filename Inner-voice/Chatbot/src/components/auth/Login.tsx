@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { useAuth } from '../../contexts/AuthContext';
 import { authService } from '../../services/authService';
 import { Logo } from '../Logo';
+import { GoogleLoginButton } from './GoogleLoginButton';
 
 interface LoginProps {
   onSwitchToRegister?: () => void;
@@ -113,6 +114,26 @@ export const Login: React.FC<LoginProps> = ({ onSwitchToRegister, onLoginSuccess
               </div>
             </div>
           )}
+
+          {/* Google Login Button */}
+          <GoogleLoginButton
+            onSuccess={onLoginSuccess}
+            onError={(error) => {
+              // Error handling is done within the component,
+              // but we could show a toast or alert here if needed
+              console.error('Google login error:', error);
+            }}
+          />
+
+          {/* Divider */}
+          <div className="relative my-6">
+            <div className="absolute inset-0 flex items-center">
+              <div className="w-full border-t border-gray-300"></div>
+            </div>
+            <div className="relative flex justify-center text-sm">
+              <span className="px-4 bg-white/80 text-gray-600 font-medium">Or continue with email</span>
+            </div>
+          </div>
 
           {/* Login Form */}
           <form onSubmit={handleSubmit} className="space-y-6">

@@ -34,11 +34,11 @@ export function TypingIndicator({ character }: TypingIndicatorProps): JSX.Elemen
       </div>
 
       <div className="flex flex-col gap-2">
-        <div className="rounded-xl px-6 py-4 shadow-lg border border-gray-600/50 bg-gray-800/95 backdrop-blur-sm">
+        <div className="rounded-xl px-6 py-4 shadow-lg border border-gray-200/50 bg-white/95 backdrop-blur-sm">
           <div className="flex gap-2 items-center">
-            <div className="w-3 h-3 bg-white/60 rounded-full animate-bounce"></div>
-            <div className="w-3 h-3 bg-white/60 rounded-full animate-bounce delay-150"></div>
-            <div className="w-3 h-3 bg-white/60 rounded-full animate-bounce delay-300"></div>
+            <div className="w-3 h-3 bg-gray-400 rounded-full animate-bounce"></div>
+            <div className="w-3 h-3 bg-gray-400 rounded-full animate-bounce delay-150"></div>
+            <div className="w-3 h-3 bg-gray-400 rounded-full animate-bounce delay-300"></div>
           </div>
         </div>
         <p

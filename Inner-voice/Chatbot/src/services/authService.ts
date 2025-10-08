@@ -6,6 +6,7 @@ import {
   RegistrationData,
   UserProfile
 } from '../types/Auth';
+import { googleAuthService } from './googleAuthService';
 
 // Local storage keys
 const TOKEN_KEY = 'auth_token';
@@ -140,10 +141,50 @@ class AuthService {
   }
 
   /**
+   * Login with Google credential (ID token)
+   * @param credential - Google ID token
+   * @returns Promise with auth response
+   */
+  async loginWithGoogle(credential: string): Promise<AuthResponse> {
+    try {
+      const authResponse = await googleAuthService.loginWithCredential(credential);
+
+      // Store tokens and user data
+      this.storeAuthData(authResponse);
+
+      return authResponse;
+    } catch (error) {
+      const errorMessage = handleApiError(error);
+      console.error('Google login failed:', errorMessage);
+      throw new Error(errorMessage);
+    }
+  }
+
+  /**
+   * Login with Google user info
+   * @param userInfo - Google user profile data
+   * @returns Promise with auth response
+   */
+  async loginWithGoogleUserInfo(userInfo: any): Promise<AuthResponse> {
+    try {
+      const authResponse = await googleAuthService.loginWithUserInfo(userInfo);
+
+      // Store tokens and user data
+      this.storeAuthData(authResponse);
+
+      return authResponse;
+    } catch (error) {
+      const errorMessage = handleApiError(error);
+      console.error('Google userinfo login failed:', errorMessage);
+      throw new Error(errorMessage);
+    }
+  }
+
+  /**
    * Store authentication data in local storage
    * @param authData - Auth response from backend
    */
-  private storeAuthData(authData: AuthResponse): void {
+  storeAuthData(authData: AuthResponse): void {
     localStorage.setItem(TOKEN_KEY, authData.accessToken);
     localStorage.setItem(REFRESH_TOKEN_KEY, authData.refreshToken);
     localStorage.setItem(USER_KEY, JSON.stringify(authData.user));

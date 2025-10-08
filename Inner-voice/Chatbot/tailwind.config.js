@@ -50,7 +50,7 @@ export default {
       },
       fontFamily: {
         character: ['Varela Round', 'ui-sans-serif', 'system-ui', 'sans-serif'],
-        content: ['Lato', 'ui-sans-serif', 'system-ui', 'sans-serif'],
+        content: ['Varela Round', 'ui-sans-serif', 'system-ui', 'sans-serif'],
       },
       fontSize: {
         'message': 'var(--font-message)',

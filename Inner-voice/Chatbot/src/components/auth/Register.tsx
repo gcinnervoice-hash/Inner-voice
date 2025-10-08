@@ -3,6 +3,7 @@ import { useAuth } from '../../contexts/AuthContext';
 import { authService } from '../../services/authService';
 import { CharacterType } from '../../types/Character';
 import { Logo } from '../Logo';
+import { GoogleLoginButton } from './GoogleLoginButton';
 
 interface RegisterProps {
   onSwitchToLogin?: () => void;
@@ -142,6 +143,24 @@ export const Register: React.FC<RegisterProps> = ({ onSwitchToLogin, onRegisterS
               </div>
             </div>
           )}
+
+          {/* Google Signup Button */}
+          <GoogleLoginButton
+            onSuccess={onRegisterSuccess}
+            onError={(error) => {
+              console.error('Google signup error:', error);
+            }}
+          />
+
+          {/* Divider */}
+          <div className="relative my-6">
+            <div className="absolute inset-0 flex items-center">
+              <div className="w-full border-t border-gray-300"></div>
+            </div>
+            <div className="relative flex justify-center text-sm">
+              <span className="px-4 bg-white/80 text-gray-600 font-medium">Or sign up with email</span>
+            </div>
+          </div>
 
           {/* Registration Form */}
           <form onSubmit={handleSubmit} className="space-y-5">

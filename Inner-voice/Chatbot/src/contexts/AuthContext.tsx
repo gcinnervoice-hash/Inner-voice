@@ -118,6 +118,39 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
   };
 
   /**
+   * Login user with Google OAuth
+   * @param userInfoJson - JSON string of Google user info
+   */
+  const loginWithGoogle = async (userInfoJson: string): Promise<void> => {
+    try {
+      setAuthState(prev => ({ ...prev, isLoading: true, error: null }));
+
+      // Parse the userInfo JSON
+      const userInfo = JSON.parse(userInfoJson);
+
+      // Call the userInfo endpoint (not the token endpoint)
+      const authResponse = await authService.loginWithGoogleUserInfo(userInfo);
+
+      setAuthState({
+        user: authResponse.user,
+        accessToken: authResponse.accessToken,
+        refreshToken: authResponse.refreshToken,
+        isAuthenticated: true,
+        isLoading: false,
+        error: null,
+      });
+    } catch (error) {
+      const errorMessage = error instanceof Error ? error.message : 'Google login failed';
+      setAuthState(prev => ({
+        ...prev,
+        isLoading: false,
+        error: errorMessage,
+      }));
+      throw error;
+    }
+  };
+
+  /**
    * Register new user
    */
   const register = async (data: RegistrationData): Promise<void> => {
@@ -211,6 +244,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
   const contextValue: AuthContextType = {
     ...authState,
     login,
+    loginWithGoogle,
     register,
     logout,
     refreshAccessToken,

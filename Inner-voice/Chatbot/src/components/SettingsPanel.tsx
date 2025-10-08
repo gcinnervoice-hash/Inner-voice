@@ -63,92 +63,125 @@ export function SettingsPanel({ currentCharacter, collapsed = false }: SettingsP
 
   if (collapsed) {
     return (
-      <div className="px-3 py-2">
-        <Popover>
-          <PopoverTrigger asChild>
-            <button
-              className={`w-full p-2 ${sidebarStyles.buttonBg} rounded-lg border ${sidebarStyles.border} transition-all duration-200 hover:scale-[1.02] shadow-sm hover:shadow-md`}
-              title="Settings"
-            >
-              <Settings className={`w-4 h-4 ${sidebarStyles.textPrimary} mx-auto transition-all duration-200`} />
-            </button>
-          </PopoverTrigger>
-          <PopoverContent side="right" align="start" className="w-80">
-            <div className="space-y-1">
-              {/* Header */}
-              <div className="flex items-center gap-2 p-3 rounded-lg">
-                <Settings className={`w-4 h-4 ${sidebarStyles.textPrimary}`} />
-                <span className={`font-semibold ${sidebarStyles.textPrimary} ${sidebarStyles.fontButton}`}>Settings</span>
-              </div>
+      <>
+        <div className="px-3 py-2">
+          <Popover>
+            <PopoverTrigger asChild>
+              <button
+                className={`w-full p-2 ${sidebarStyles.buttonBg} rounded-lg border ${sidebarStyles.border} transition-all duration-200 hover:scale-[1.02] shadow-sm hover:shadow-md`}
+                title="Settings"
+              >
+                <Settings className={`w-4 h-4 ${sidebarStyles.textPrimary} mx-auto transition-all duration-200`} />
+              </button>
+            </PopoverTrigger>
+            <PopoverContent side="right" align="start" className="w-80">
+              <div className="space-y-1">
+                {/* Header */}
+                <div className="flex items-center gap-2 p-3 rounded-lg">
+                  <Settings className={`w-4 h-4 ${sidebarStyles.textPrimary}`} />
+                  <span className={`font-semibold ${sidebarStyles.textPrimary} ${sidebarStyles.fontButton}`}>Settings</span>
+                </div>
 
-              {/* User Profile Section */}
-              {user && (
-                <div className={`p-3 ${sidebarStyles.buttonBg} rounded-lg border ${sidebarStyles.border} mx-3 my-2`}>
-                  <div className="flex items-center gap-3">
-                    <div className={`w-10 h-10 ${sidebarStyles.buttonBg} rounded-full flex items-center justify-center border ${sidebarStyles.border}`}>
-                      <User className={`w-5 h-5 ${sidebarStyles.textPrimary}`} />
-                    </div>
-                    <div className="flex-1 min-w-0">
-                      <p className={`font-semibold ${sidebarStyles.textPrimary} ${sidebarStyles.fontCaption} truncate`}>
-                        {user.username}
-                      </p>
-                      <p className={`text-xs ${sidebarStyles.textSecondary} truncate`}>
-                        {user.email}
-                      </p>
+                {/* User Profile Section */}
+                {user && (
+                  <div className={`p-3 ${sidebarStyles.buttonBg} rounded-lg border ${sidebarStyles.border} mx-3 my-2`}>
+                    <div className="flex items-center gap-3">
+                      <div className={`w-10 h-10 ${sidebarStyles.buttonBg} rounded-full flex items-center justify-center border ${sidebarStyles.border}`}>
+                        <User className={`w-5 h-5 ${sidebarStyles.textPrimary}`} />
+                      </div>
+                      <div className="flex-1 min-w-0">
+                        <p className={`font-semibold ${sidebarStyles.textPrimary} ${sidebarStyles.fontCaption} truncate`}>
+                          {user.username}
+                        </p>
+                        <p className={`text-xs ${sidebarStyles.textSecondary} truncate`}>
+                          {user.email}
+                        </p>
+                      </div>
                     </div>
                   </div>
-                </div>
-              )}
+                )}
 
-              {/* Font Size Section */}
-              <div className="p-3 rounded-lg transition-all duration-200">
-                <div className="flex items-center justify-between">
-                  <span className={`font-medium ${sidebarStyles.textPrimary} ${sidebarStyles.fontCaption}`}>Font Size</span>
-                  <select
-                    value={settings.fontSize}
-                    onChange={(e) => updateSetting('fontSize', e.target.value as 'small' | 'medium' | 'large')}
-                    className={`border ${sidebarStyles.border} ${sidebarStyles.panelBg} ${sidebarStyles.textPrimary} rounded px-2 py-1 ${sidebarStyles.fontCaption} font-medium transition-all duration-200 hover:scale-[1.02] shadow-sm hover:shadow-md focus:ring-2 focus:ring-green-400/50 focus:outline-none`}
-                  >
-                    <option value="small">Small</option>
-                    <option value="medium">Medium</option>
-                    <option value="large">Large</option>
-                  </select>
-                </div>
-              </div>
-
-              {/* Timestamps Section */}
-              <div className="p-3 rounded-lg transition-all duration-200">
-                <div className="flex items-center justify-between">
-                  <span className={`font-medium ${sidebarStyles.textPrimary} ${sidebarStyles.fontCaption}`}>Show Timestamps</span>
-                  <button
-                    onClick={() => updateSetting('showTimestamps', !settings.showTimestamps)}
-                    className={`w-8 h-4 rounded-full transition-all duration-200 hover:scale-[1.02] shadow-sm hover:shadow-md ${
-                      settings.showTimestamps ? 'bg-green-500' : 'bg-gray-400'
-                    }`}
-                  >
-                    <div className={`w-3 h-3 bg-white rounded-full shadow transition-transform ${
-                      settings.showTimestamps ? 'translate-x-4' : 'translate-x-0'
-                    }`} />
-                  </button>
-                </div>
-              </div>
-
-              {/* Logout Section */}
-              {isAuthenticated && (
+                {/* Font Size Section */}
                 <div className="p-3 rounded-lg transition-all duration-200">
-                  <button
-                    onClick={handleLogoutClick}
-                    className={`w-full flex items-center justify-center gap-2 px-3 py-2 bg-red-500/20 hover:bg-red-500/30 border border-red-400/30 rounded-lg transition-all duration-200 hover:scale-[1.02] shadow-sm hover:shadow-md`}
-                  >
-                    <LogOut className="w-4 h-4 text-red-500" />
-                    <span className={`font-medium text-red-500 ${sidebarStyles.fontCaption}`}>Log Out</span>
-                  </button>
+                  <div className="flex items-center justify-between">
+                    <span className={`font-medium ${sidebarStyles.textPrimary} ${sidebarStyles.fontCaption}`}>Font Size</span>
+                    <select
+                      value={settings.fontSize}
+                      onChange={(e) => updateSetting('fontSize', e.target.value as 'small' | 'medium' | 'large')}
+                      className={`border ${sidebarStyles.border} ${sidebarStyles.panelBg} ${sidebarStyles.textPrimary} rounded px-2 py-1 ${sidebarStyles.fontCaption} font-medium transition-all duration-200 hover:scale-[1.02] shadow-sm hover:shadow-md focus:ring-2 focus:ring-green-400/50 focus:outline-none`}
+                    >
+                      <option value="small">Small</option>
+                      <option value="medium">Medium</option>
+                      <option value="large">Large</option>
+                    </select>
+                  </div>
                 </div>
-              )}
+
+                {/* Timestamps Section */}
+                <div className="p-3 rounded-lg transition-all duration-200">
+                  <div className="flex items-center justify-between">
+                    <span className={`font-medium ${sidebarStyles.textPrimary} ${sidebarStyles.fontCaption}`}>Show Timestamps</span>
+                    <button
+                      onClick={() => updateSetting('showTimestamps', !settings.showTimestamps)}
+                      className={`w-8 h-4 rounded-full transition-all duration-200 hover:scale-[1.02] shadow-sm hover:shadow-md ${
+                        settings.showTimestamps ? 'bg-green-500' : 'bg-gray-400'
+                      }`}
+                    >
+                      <div className={`w-3 h-3 bg-white rounded-full shadow transition-transform ${
+                        settings.showTimestamps ? 'translate-x-4' : 'translate-x-0'
+                      }`} />
+                    </button>
+                  </div>
+                </div>
+
+                {/* Logout Section */}
+                {isAuthenticated && (
+                  <div className="p-3 rounded-lg transition-all duration-200">
+                    <button
+                      onClick={handleLogoutClick}
+                      className={`w-full flex items-center justify-center gap-2 px-3 py-2 bg-red-500/20 hover:bg-red-500/30 border border-red-400/30 rounded-lg transition-all duration-200 hover:scale-[1.02] shadow-sm hover:shadow-md`}
+                    >
+                      <LogOut className="w-4 h-4 text-red-500" />
+                      <span className={`font-medium text-red-500 ${sidebarStyles.fontCaption}`}>Log Out</span>
+                    </button>
+                  </div>
+                )}
+              </div>
+            </PopoverContent>
+          </Popover>
+        </div>
+
+        {/* Logout Confirmation Dialog - also needed for collapsed state */}
+        <Dialog open={showLogoutDialog} onOpenChange={setShowLogoutDialog}>
+          <DialogContent className={`sm:max-w-md ${themeClasses.panelBg} backdrop-blur-xl border ${themeClasses.cardBorder}`}>
+            <DialogHeader>
+              <DialogTitle className={`${themeClasses.primaryText} ${themeClasses.fontHeading} flex items-center gap-2`}>
+                <LogOut className="w-5 h-5 text-red-500" />
+                Confirm Logout
+              </DialogTitle>
+            </DialogHeader>
+            <div className="space-y-4 py-4">
+              <p className={`${themeClasses.secondaryText} ${themeClasses.fontBody}`}>
+                Are you sure you want to log out? Your current conversation will be saved.
+              </p>
+              <div className="flex gap-3 justify-end">
+                <button
+                  onClick={() => setShowLogoutDialog(false)}
+                  className={`px-4 py-2 ${themeClasses.buttonBg} ${themeClasses.primaryText} rounded-lg border ${themeClasses.cardBorder} hover:scale-[1.02] transition-all duration-200 font-semibold ${themeClasses.fontLabel}`}
+                >
+                  Cancel
+                </button>
+                <button
+                  onClick={confirmLogout}
+                  className="px-4 py-2 bg-red-500 text-white rounded-lg hover:bg-red-600 hover:scale-[1.02] transition-all duration-200 font-semibold"
+                >
+                  Log Out
+                </button>
+              </div>
             </div>
-          </PopoverContent>
-        </Popover>
-      </div>
+          </DialogContent>
+        </Dialog>
+      </>
     );
   }
 
