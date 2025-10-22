@@ -38,7 +38,9 @@ export const EmotionJournal: React.FC = () => {
   const [cards, setCards] = useState<EmotionCardType[]>([]);
   const [stats, setStats] = useState<EmotionCardStats | null>(null);
   const [isLoading, setIsLoading] = useState(true);
+  const [isLoadingStats, setIsLoadingStats] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [statsError, setStatsError] = useState<string | null>(null);
   const [selectedCard, setSelectedCard] = useState<EmotionCardType | null>(null);
   const [showFilters, setShowFilters] = useState(false);
   const [showStats, setShowStats] = useState(false);
@@ -52,11 +54,15 @@ export const EmotionJournal: React.FC = () => {
     offset: 0
   });
 
-  // Load emotion cards
+  // Load emotion cards when filters change
   useEffect(() => {
     loadCards();
-    loadStats();
   }, [filters]);
+
+  // Load stats once on component mount (stats show overall patterns, not filtered data)
+  useEffect(() => {
+    loadStats();
+  }, []);
 
   const loadCards = async () => {
     try {
@@ -75,10 +81,22 @@ export const EmotionJournal: React.FC = () => {
 
   const loadStats = async () => {
     try {
+      setIsLoadingStats(true);
+      setStatsError(null);
       const statsData = await emotionService.getStats();
+
+      // Ensure averageIntensity is a number
+      if (statsData && typeof statsData.averageIntensity === 'string') {
+        statsData.averageIntensity = parseFloat(statsData.averageIntensity);
+      }
+
       setStats(statsData);
     } catch (err) {
+      const errorMsg = err instanceof Error ? err.message : 'Failed to load statistics';
+      setStatsError(errorMsg);
       console.error('Error loading stats:', err);
+    } finally {
+      setIsLoadingStats(false);
     }
   };
 
@@ -241,32 +259,121 @@ export const EmotionJournal: React.FC = () => {
       {/* Main Content */}
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         {/* Statistics Panel */}
-        {showStats && stats && (
-          <div className={`mb-8 grid grid-cols-1 md:grid-cols-3 gap-4 ${cardBgClasses} rounded-2xl p-6 shadow-lg border-2 backdrop-blur-sm`}>
-            <div>
-              <div className={`text-sm font-medium ${isForestTheme ? 'text-emerald-300' : 'text-gray-600'} mb-2`}>
-                Total Cards
+        {showStats && (
+          <div className={`mb-8 rounded-2xl overflow-hidden ${cardBgClasses} shadow-lg border-2 backdrop-blur-sm`}>
+            {/* Stats Loading State */}
+            {isLoadingStats && (
+              <div className="p-6 flex items-center justify-center gap-3">
+                <div className="w-4 h-4 rounded-full bg-gradient-to-r from-emerald-400 to-purple-500 animate-pulse"></div>
+                <p className={isForestTheme ? 'text-emerald-200' : 'text-gray-600'}>Loading statistics...</p>
               </div>
-              <div className={`text-4xl font-bold ${isForestTheme ? 'text-emerald-100' : 'text-purple-600'}`}>
-                {stats.totalCards}
+            )}
+
+            {/* Stats Error State */}
+            {statsError && !isLoadingStats && (
+              <div className={`p-6 flex items-start gap-3 ${isForestTheme ? 'bg-red-900/20 border-t-2 border-red-700' : 'bg-red-50 border-t-2 border-red-200'}`}>
+                <AlertCircle className={`w-5 h-5 flex-shrink-0 mt-0.5 ${isForestTheme ? 'text-red-300' : 'text-red-600'}`} />
+                <div>
+                  <p className={`font-semibold ${isForestTheme ? 'text-red-200' : 'text-red-800'}`}>
+                    Couldn't load statistics
+                  </p>
+                  <p className={`text-sm mt-1 ${isForestTheme ? 'text-red-300' : 'text-red-700'}`}>
+                    {statsError}
+                  </p>
+                  <button
+                    onClick={loadStats}
+                    className={`text-sm font-semibold mt-2 px-3 py-1 rounded transition-colors ${
+                      isForestTheme
+                        ? 'text-emerald-300 hover:bg-emerald-700/30'
+                        : 'text-purple-600 hover:bg-purple-50'
+                    }`}
+                  >
+                    Try again
+                  </button>
+                </div>
               </div>
-            </div>
-            <div>
-              <div className={`text-sm font-medium ${isForestTheme ? 'text-emerald-300' : 'text-gray-600'} mb-2`}>
-                Average Intensity
+            )}
+
+            {/* Stats Content */}
+            {stats && !isLoadingStats && !statsError && (
+              <div className="p-6">
+                <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
+                  {/* Total Cards */}
+                  <div>
+                    <div className={`text-sm font-medium ${isForestTheme ? 'text-emerald-300' : 'text-gray-600'} mb-2`}>
+                      Total Cards
+                    </div>
+                    <div className={`text-4xl font-bold ${isForestTheme ? 'text-emerald-100' : 'text-purple-600'}`}>
+                      {stats.totalCards}
+                    </div>
+                  </div>
+
+                  {/* Average Intensity */}
+                  <div>
+                    <div className={`text-sm font-medium ${isForestTheme ? 'text-emerald-300' : 'text-gray-600'} mb-2`}>
+                      Average Intensity
+                    </div>
+                    <div className={`text-4xl font-bold ${isForestTheme ? 'text-emerald-100' : 'text-purple-600'}`}>
+                      {typeof stats.averageIntensity === 'number' ? stats.averageIntensity.toFixed(1) : '0.0'}/10
+                    </div>
+                    <div className={`text-xs mt-1 ${isForestTheme ? 'text-emerald-400' : 'text-purple-500'}`}>
+                      {stats.totalCards > 0 && stats.averageIntensity > 6 ? '⚠️ Higher intensity' : '✨ Steady'}
+                    </div>
+                  </div>
+
+                  {/* Most Common Tag */}
+                  <div>
+                    <div className={`text-sm font-medium ${isForestTheme ? 'text-emerald-300' : 'text-gray-600'} mb-2`}>
+                      Top Tag
+                    </div>
+                    <div className={`text-2xl font-bold ${isForestTheme ? 'text-emerald-100' : 'text-purple-600'}`}>
+                      {stats.mostCommonTags && stats.mostCommonTags.length > 0 ? stats.mostCommonTags[0].tag : 'N/A'}
+                    </div>
+                    {stats.mostCommonTags && stats.mostCommonTags[0] && (
+                      <div className={`text-xs mt-1 ${isForestTheme ? 'text-emerald-400' : 'text-purple-500'}`}>
+                        {stats.mostCommonTags[0].count}x mentioned
+                      </div>
+                    )}
+                  </div>
+
+                  {/* Emotion Breakdown */}
+                  <div>
+                    <div className={`text-sm font-medium ${isForestTheme ? 'text-emerald-300' : 'text-gray-600'} mb-2`}>
+                      Breakdown
+                    </div>
+                    <div className="space-y-1">
+                      <div className="flex items-center gap-2">
+                        <div className="w-2 h-2 rounded-full bg-green-500"></div>
+                        <span className={`text-sm ${isForestTheme ? 'text-emerald-200' : 'text-gray-700'}`}>
+                          Positive: {stats.categoryBreakdown?.positive || 0}
+                        </span>
+                      </div>
+                      <div className="flex items-center gap-2">
+                        <div className="w-2 h-2 rounded-full bg-red-500"></div>
+                        <span className={`text-sm ${isForestTheme ? 'text-emerald-200' : 'text-gray-700'}`}>
+                          Negative: {stats.categoryBreakdown?.negative || 0}
+                        </span>
+                      </div>
+                      <div className="flex items-center gap-2">
+                        <div className="w-2 h-2 rounded-full bg-purple-500"></div>
+                        <span className={`text-sm ${isForestTheme ? 'text-emerald-200' : 'text-gray-700'}`}>
+                          Mixed: {stats.categoryBreakdown?.mixed || 0}
+                        </span>
+                      </div>
+                    </div>
+                  </div>
+                </div>
               </div>
-              <div className={`text-4xl font-bold ${isForestTheme ? 'text-emerald-100' : 'text-purple-600'}`}>
-                {stats.averageIntensity.toFixed(1)}/10
+            )}
+
+            {/* Empty Stats State */}
+            {stats && stats.totalCards === 0 && !isLoadingStats && !statsError && (
+              <div className={`p-6 text-center ${isForestTheme ? 'border-t-2 border-emerald-700' : 'border-t-2 border-gray-200'}`}>
+                <p className={isForestTheme ? 'text-emerald-200' : 'text-gray-600'}>
+                  No emotion cards yet. Start chatting to generate your first card!
+                </p>
               </div>
-            </div>
-            <div>
-              <div className={`text-sm font-medium ${isForestTheme ? 'text-emerald-300' : 'text-gray-600'} mb-2`}>
-                Most Common Tag
-              </div>
-              <div className={`text-2xl font-bold ${isForestTheme ? 'text-emerald-100' : 'text-purple-600'}`}>
-                {stats.mostCommonTags[0]?.tag || 'N/A'}
-              </div>
-            </div>
+            )}
           </div>
         )}
 
