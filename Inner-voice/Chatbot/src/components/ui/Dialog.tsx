@@ -91,7 +91,18 @@ const DialogDescription = React.forwardRef<
 });
 DialogDescription.displayName = DialogPrimitive.Description.displayName;
 
+// Export with both old names (for backward compatibility) and new names (for consistency)
 export {
+  // Old names for backward compatibility with existing imports
+  Dialog,
+  DialogPortal,
+  DialogOverlay,
+  DialogTrigger,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogDescription,
+  // New names for namespace imports (e.g., Dialog.Root)
   Dialog as Root,
   DialogPortal as Portal,
   DialogOverlay as Overlay,
