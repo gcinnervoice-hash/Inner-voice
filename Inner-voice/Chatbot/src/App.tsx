@@ -1,4 +1,5 @@
- import React, { useState, useRef, useEffect, useCallback, useMemo, memo } from "react";
+ import React, { useState, useRef, useEffect, useCallback, useMemo, memo, createContext, useContext } from "react";
+import { Routes, Route, Navigate, useNavigate, Outlet } from 'react-router-dom';
 import { ChatMessage } from "./components/ChatMessage";
 import { TypingIndicator } from "./components/TypingIndicator";
 import { SendIcon } from "./components/SendIcon";
@@ -12,6 +13,16 @@ import { ErrorBoundary } from "./components/ErrorBoundary";
 import { chatService } from "./services/chatService";
 import { useAuth } from "./contexts/AuthContext";
 import { AuthPage } from "./components/auth/AuthPage";
+import { LandingPage } from "./components/LandingPage";
+import { PrivacyPolicy } from "./components/legal/PrivacyPolicy";
+import { TermsOfService } from "./components/legal/TermsOfService";
+import { CookiePolicy } from "./components/legal/CookiePolicy";
+import { CookieConsentBanner } from "./components/CookieConsentBanner";
+import { EmotionAnalysisLoading } from "./components/DoneTalkingButton";
+import { AnimatedEmotionCard } from "./components/EmotionCard";
+import { EmotionJournal } from "./components/EmotionJournal";
+import { emotionService } from "./services/emotionService";
+import { EmotionCard as EmotionCardType } from "./types/Emotion";
 
 
 // Development debug utility
@@ -22,11 +33,56 @@ const debugLog = (...args: any[]): void => {
   }
 };
 
-function AppContent(): JSX.Element {
-  const themeClasses = useThemeClasses();
-  const { settings } = useTheme();
-  const { isAuthenticated, isLoading: authLoading, user, logout } = useAuth();
+// Conversation Context for persisting state across routes
+// Includes all conversation data AND UI state to preserve them during navigation
+export const ConversationContext = createContext<{
+  // Conversation data
+  messages: Message[];
+  setMessages: React.Dispatch<React.SetStateAction<Message[]>>;
+  currentCharacter: Character;
+  setCurrentCharacter: React.Dispatch<React.SetStateAction<Character>>;
+  sessionId: string | undefined;
+  setSessionId: React.Dispatch<React.SetStateAction<string | undefined>>;
 
+  // UI state that must survive navigation
+  inputValue: string;
+  setInputValue: React.Dispatch<React.SetStateAction<string>>;
+  sidebarCollapsed: boolean;
+  setSidebarCollapsed: React.Dispatch<React.SetStateAction<boolean>>;
+  useRealAPI: boolean;
+  setUseRealAPI: React.Dispatch<React.SetStateAction<boolean>>;
+
+  // Loading and status states
+  isTyping: boolean;
+  setIsTyping: React.Dispatch<React.SetStateAction<boolean>>;
+  isAnalyzingEmotion: boolean;
+  setIsAnalyzingEmotion: React.Dispatch<React.SetStateAction<boolean>>;
+  emotionError: string | null;
+  setEmotionError: React.Dispatch<React.SetStateAction<string | null>>;
+
+  // Emotion card state
+  createdEmotionCard: EmotionCardType | null;
+  setCreatedEmotionCard: React.Dispatch<React.SetStateAction<EmotionCardType | null>>;
+
+  // Dialog state for character switching warning
+  showSwitchDialog: boolean;
+  setShowSwitchDialog: React.Dispatch<React.SetStateAction<boolean>>;
+  pendingCharacterType: CharacterType | null;
+  setPendingCharacterType: React.Dispatch<React.SetStateAction<CharacterType | null>>;
+
+  // Utilities
+  getValidCharacter: (characterId?: string) => Character;
+} | null>(null);
+
+export const useConversation = () => {
+  const context = useContext(ConversationContext);
+  if (!context) throw new Error('useConversation must be used within AppLayout');
+  return context;
+};
+
+// Conversation state wrapper - holds state for all /app/* routes
+// All state including UI state is preserved across navigation
+function AppLayout(): JSX.Element {
   // Character state management
   const [currentCharacter, setCurrentCharacter] = useState<Character>(getDefaultCharacter());
 
@@ -57,15 +113,93 @@ function AppContent(): JSX.Element {
     ];
   });
 
-  const [inputValue, setInputValue] = useState("");
-  const [isTyping, setIsTyping] = useState(false);
-  const [sidebarCollapsed, setSidebarCollapsed] = useState(true);
+  // Session and conversation state
   const [sessionId, setSessionId] = useState<string | undefined>(undefined);
-  const [useRealAPI, setUseRealAPI] = useState(true); // Toggle for using real API vs mock
+  const [isTyping, setIsTyping] = useState(false);
+
+  // UI state that now persists across navigation
+  const [inputValue, setInputValue] = useState("");
+  const [sidebarCollapsed, setSidebarCollapsed] = useState(true);
+  const [useRealAPI, setUseRealAPI] = useState(true);
+
+  // Loading and error states
+  const [isAnalyzingEmotion, setIsAnalyzingEmotion] = useState(false);
+  const [emotionError, setEmotionError] = useState<string | null>(null);
 
   // Dialog state for character switching warning
   const [showSwitchDialog, setShowSwitchDialog] = useState(false);
   const [pendingCharacterType, setPendingCharacterType] = useState<CharacterType | null>(null);
+
+  // Emotion card state
+  const [createdEmotionCard, setCreatedEmotionCard] = useState<EmotionCardType | null>(null);
+
+  // Provide COMPLETE conversation state to all child routes
+  // This ensures all state survives navigation between /app routes
+  return (
+    <ConversationContext.Provider value={{
+      // Conversation data
+      messages, setMessages,
+      currentCharacter, setCurrentCharacter,
+      sessionId, setSessionId,
+
+      // UI state (persists across navigation)
+      inputValue, setInputValue,
+      sidebarCollapsed, setSidebarCollapsed,
+      useRealAPI, setUseRealAPI,
+
+      // Loading and status states
+      isTyping, setIsTyping,
+      isAnalyzingEmotion, setIsAnalyzingEmotion,
+      emotionError, setEmotionError,
+
+      // Emotion card state
+      createdEmotionCard, setCreatedEmotionCard,
+
+      // Dialog state
+      showSwitchDialog, setShowSwitchDialog,
+      pendingCharacterType, setPendingCharacterType,
+
+      // Utilities
+      getValidCharacter
+    }}>
+      <Outlet />
+    </ConversationContext.Provider>
+  );
+}
+
+// Chat Interface Component (protected route)
+function ChatInterface(): JSX.Element {
+  const navigate = useNavigate();
+  const themeClasses = useThemeClasses();
+  const { settings } = useTheme();
+  const { logout } = useAuth();
+
+  // Get ALL conversation state from context (including UI state)
+  // This ensures state persists when navigating to EmotionJournal
+  const {
+    // Conversation data
+    messages, setMessages,
+    currentCharacter, setCurrentCharacter,
+    sessionId, setSessionId,
+
+    // UI state from context (persists across navigation)
+    inputValue, setInputValue,
+    sidebarCollapsed, setSidebarCollapsed,
+    useRealAPI, setUseRealAPI,
+
+    // Loading states
+    isTyping, setIsTyping,
+    isAnalyzingEmotion, setIsAnalyzingEmotion,
+    emotionError, setEmotionError,
+
+    // Emotion card state
+    createdEmotionCard, setCreatedEmotionCard,
+
+    // Dialog state
+    showSwitchDialog, setShowSwitchDialog,
+    pendingCharacterType, setPendingCharacterType,
+    getValidCharacter
+  } = useConversation();
 
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
@@ -268,22 +402,65 @@ function AppContent(): JSX.Element {
     }
   };
 
-  // Show loading screen while checking authentication
-  if (authLoading) {
-    return (
-      <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-green-50 via-emerald-50 to-teal-50">
-        <div className="text-center">
-          <div className="inline-block animate-spin rounded-full h-12 w-12 border-4 border-green-500 border-t-transparent mb-4"></div>
-          <p className="text-gray-600 font-medium">Loading Inner Voice...</p>
-        </div>
-      </div>
-    );
-  }
+  // Handle emotion analysis (Done Talking)
+  const handleAnalyzeConversation = useCallback(async () => {
+    if (!sessionId) {
+      setEmotionError('No active conversation to analyze');
+      return;
+    }
 
-  // Show auth page if not authenticated
-  if (!isAuthenticated) {
-    return <AuthPage />;
-  }
+    try {
+      setIsAnalyzingEmotion(true);
+      setEmotionError(null);
+
+      debugLog('Analyzing conversation for emotion card', { sessionId, characterId: currentCharacter.id });
+
+      // Call emotion service to analyze conversation
+      const response = await emotionService.analyzeConversation(
+        sessionId,
+        currentCharacter.id as CharacterType
+      );
+
+      debugLog('Emotion card created successfully', { cardId: response.card.id });
+
+      // Show the created card
+      setCreatedEmotionCard(response.card);
+
+      // Clear the conversation (start fresh)
+      setMessages([]);
+      setSessionId(undefined);
+
+      // Show success message after a delay
+      setTimeout(() => {
+        const successMessage: Message = {
+          id: `success-${Date.now()}`,
+          text: `✨ Your emotion card has been created and saved to your journal! The conversation has been permanently deleted for your privacy. You can view your emotion card in the journal.`,
+          isUser: false,
+          timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
+          characterId: currentCharacter.id,
+          category: 'supportive'
+        };
+        setMessages([successMessage]);
+      }, 3000);
+
+    } catch (error) {
+      console.error('Failed to analyze conversation:', error);
+      setEmotionError(error instanceof Error ? error.message : 'Failed to create emotion card');
+
+      // Show error message
+      const errorMessage: Message = {
+        id: `error-${Date.now()}`,
+        text: `Sorry, I couldn't create your emotion card. Please try again later or contact support if the issue persists.`,
+        isUser: false,
+        timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
+        characterId: currentCharacter.id,
+        category: 'supportive'
+      };
+      setMessages([errorMessage]);
+    } finally {
+      setIsAnalyzingEmotion(false);
+    }
+  }, [sessionId, currentCharacter]);
 
   return (
     <div
@@ -330,6 +507,10 @@ function AppContent(): JSX.Element {
           onToggleCollapse={handleToggleCollapse}
           currentCharacter={currentCharacter}
           onCharacterChange={handleCharacterChange}
+          onDoneTalking={handleAnalyzeConversation}
+          isAnalyzing={isAnalyzingEmotion}
+          canAnalyze={!!sessionId && !createdEmotionCard}
+          messageCount={messages.length}
         />
       </div>
 
@@ -429,16 +610,100 @@ function AppContent(): JSX.Element {
         targetCharacter={pendingCharacterType ? getCharacter(pendingCharacterType) : undefined}
         sidebarCollapsed={sidebarCollapsed}
       />
+
+      {/* Emotion Analysis Loading Screen */}
+      {isAnalyzingEmotion && (
+        <EmotionAnalysisLoading message="Analyzing your conversation with AI..." />
+      )}
+
+      {/* Emotion Card Success Display */}
+      {createdEmotionCard && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm p-4">
+          <div className="max-w-2xl w-full">
+            <AnimatedEmotionCard
+              card={createdEmotionCard}
+              onAnimationComplete={() => {
+                setTimeout(() => setCreatedEmotionCard(null), 5000);
+              }}
+            />
+            <div className="text-center mt-6">
+              <button
+                onClick={() => setCreatedEmotionCard(null)}
+                className="px-6 py-3 rounded-xl bg-white text-purple-700 font-semibold hover:bg-purple-50 transition-colors shadow-lg mr-4"
+              >
+                Close
+              </button>
+              <button
+                onClick={() => {
+                  setCreatedEmotionCard(null);
+                  navigate('/app/journal');
+                }}
+                className="px-6 py-3 rounded-xl bg-gradient-to-r from-purple-500 to-pink-500 text-white font-semibold hover:from-purple-600 hover:to-pink-600 transition-all shadow-lg"
+              >
+                View Journal
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
 
-// Main App component with ErrorBoundary and ThemeProvider wrappers
+// Protected Route Component
+function ProtectedRoute({ children }: { children: React.ReactNode }) {
+  const { isAuthenticated, isLoading } = useAuth();
+
+  if (isLoading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-green-50 via-emerald-50 to-teal-50">
+        <div className="text-center">
+          <div className="inline-block animate-spin rounded-full h-12 w-12 border-4 border-green-500 border-t-transparent mb-4"></div>
+          <p className="text-gray-600 font-medium">Loading Inner Voice...</p>
+        </div>
+      </div>
+    );
+  }
+
+  if (!isAuthenticated) {
+    return <Navigate to="/auth" replace />;
+  }
+
+  return <>{children}</>;
+}
+
+// Main App component with routing
 export default function App(): JSX.Element {
   return (
     <ErrorBoundary>
       <ThemeProvider>
-        <AppContent />
+        <>
+          <CookieConsentBanner />
+          <Routes>
+            {/* Public Routes */}
+            <Route path="/" element={<LandingPage />} />
+            <Route path="/auth" element={<AuthPage />} />
+            <Route path="/privacy-policy" element={<PrivacyPolicy />} />
+            <Route path="/terms-of-service" element={<TermsOfService />} />
+            <Route path="/cookie-policy" element={<CookiePolicy />} />
+
+            {/* Protected Routes with shared state */}
+            <Route
+              path="/app"
+              element={
+                <ProtectedRoute>
+                  <AppLayout />
+                </ProtectedRoute>
+              }
+            >
+              <Route index element={<ChatInterface />} />
+              <Route path="journal" element={<EmotionJournal />} />
+            </Route>
+
+            {/* Redirect any unknown routes to landing page */}
+            <Route path="*" element={<Navigate to="/" replace />} />
+          </Routes>
+        </>
       </ThemeProvider>
     </ErrorBoundary>
   );

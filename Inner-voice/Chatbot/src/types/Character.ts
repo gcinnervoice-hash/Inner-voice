@@ -36,6 +36,7 @@ export interface CharacterResponse {
   text: string;
   category: 'supportive' | 'analytical' | 'motivational' | 'breathing' | 'problem-solving';
   trigger?: string[]; // keywords that might trigger this response
+  timeOfDay?: 'morning' | 'afternoon' | 'evening' | 'night'; // optional time-of-day filter for greetings
 }
 
 export interface ConversationContext {

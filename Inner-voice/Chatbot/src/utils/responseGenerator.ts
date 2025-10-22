@@ -195,22 +195,153 @@ export function getResponseWithTiming(
   });
 }
 
-// Function to get character introduction message (for first-time interactions)
-export function getCharacterIntroduction(character: Character): CharacterResponse {
-  const introductions: Record<CharacterType, CharacterResponse> = {
-    sheep: {
-      text: `Hi! I'm ${character.name}, your caring AI companion. I'm here to keep you company and listen to your thoughts. How are you feeling today?`,
+// Helper function to get time of day
+function getTimeOfDay(): 'morning' | 'afternoon' | 'evening' | 'night' {
+  const hour = new Date().getHours();
+
+  if (hour >= 6 && hour < 12) return 'morning';
+  if (hour >= 12 && hour < 18) return 'afternoon';
+  if (hour >= 18 && hour < 22) return 'evening';
+  return 'night';
+}
+
+// Multiple introduction templates for each character
+const INTRODUCTION_TEMPLATES: Record<CharacterType, CharacterResponse[]> = {
+  sheep: [
+    {
+      text: `Hi! I'm Daisy, your caring AI companion. I'm here to keep you company and listen to your thoughts. How are you feeling today?`,
       category: "supportive"
     },
-    rabbit: {
-      text: `Hello, I'm ${character.name}. I understand the worries and anxieties in life, let's slowly sort through your thoughts together.`,
+    {
+      text: `Hello there! I'm Daisy. I'm so glad you're here. This is a safe space where you can share anything on your mind.`,
       category: "supportive"
     },
-    fox: {
-      text: `Hello! I'm ${character.name}! I specialize in helping solve problems and creating plans. Is there any challenge you'd like to tackle together?`,
+    {
+      text: `Welcome! Daisy here, ready to listen and support you. What's on your heart today?`,
+      category: "supportive"
+    },
+    {
+      text: `Hi friend! I'm Daisy, and I'm here to provide comfort and a listening ear. How can I support you right now?`,
+      category: "supportive"
+    },
+    {
+      text: `Good morning! I'm Daisy, your gentle companion. Let's start the day together. How are you feeling this morning?`,
+      category: "supportive",
+      timeOfDay: 'morning'
+    },
+    {
+      text: `Good evening! I'm Daisy. The day is winding down - how are you doing? I'm here to listen.`,
+      category: "supportive",
+      timeOfDay: 'evening'
+    },
+    {
+      text: `Hello! I'm Daisy. Feeling like you need someone to talk to? I'm right here, ready to keep you company.`,
+      category: "supportive"
+    },
+    {
+      text: `Hi there! Daisy checking in. Remember, you're not alone - I'm here to listen and care. What would you like to share?`,
+      category: "supportive"
+    }
+  ],
+
+  rabbit: [
+    {
+      text: `Hello, I'm Luna. I understand the worries and anxieties in life. Let's slowly sort through your thoughts together.`,
+      category: "supportive"
+    },
+    {
+      text: `Hi, I'm Luna. I know how overwhelming thoughts can feel sometimes. Take a deep breath - we'll work through this together.`,
+      category: "supportive"
+    },
+    {
+      text: `Welcome. I'm Luna, and I'm here to help you navigate your worries. What's been on your mind lately?`,
+      category: "analytical"
+    },
+    {
+      text: `Hello there. Luna here. I specialize in helping with anxiety and worries. Let's take things one step at a time, okay?`,
+      category: "supportive"
+    },
+    {
+      text: `Good morning! I'm Luna. Starting a new day can bring new thoughts and worries. Want to talk through them together?`,
+      category: "supportive",
+      timeOfDay: 'morning'
+    },
+    {
+      text: `Hi! I'm Luna. Still awake and thinking about things? I'm here to help you process those late-night thoughts.`,
+      category: "supportive",
+      timeOfDay: 'night'
+    },
+    {
+      text: `Hi, I'm Luna. Your feelings are valid, and I'm here to understand them. What would you like to explore today?`,
+      category: "supportive"
+    },
+    {
+      text: `Hello. I'm Luna, your thoughtful companion. Feeling anxious or worried? Let's break things down together and find some clarity.`,
+      category: "analytical"
+    }
+  ],
+
+  fox: [
+    {
+      text: `Hello! I'm Zara! I specialize in helping solve problems and creating plans. Is there any challenge you'd like to tackle together?`,
+      category: "motivational"
+    },
+    {
+      text: `Hey there! Zara here, your problem-solving partner! Ready to turn challenges into opportunities? Let's do this!`,
+      category: "motivational"
+    },
+    {
+      text: `Hi! I'm Zara, and I'm excited to help you crush your goals! What challenge can we tackle together today?`,
+      category: "motivational"
+    },
+    {
+      text: `Welcome! I'm Zara, your clever motivator. Got a problem that needs solving? You've come to the right fox!`,
+      category: "problem-solving"
+    },
+    {
+      text: `Good morning! I'm Zara, ready to help you conquer the day! What's on your agenda? Let's create a winning plan!`,
+      category: "motivational",
+      timeOfDay: 'morning'
+    },
+    {
+      text: `Good evening! I'm Zara. Reflecting on today or planning for tomorrow? Either way, I'm here to help you strategize!`,
+      category: "problem-solving",
+      timeOfDay: 'evening'
+    },
+    {
+      text: `Hi! Zara here! Feeling stuck on something? Let's break it down and find the breakthrough you need!`,
+      category: "problem-solving"
+    },
+    {
+      text: `Hello! I'm Zara, your energetic problem-solver. You're more capable than you think - let's prove it together!`,
       category: "motivational"
     }
-  };
+  ]
+};
 
-  return introductions[character.id as CharacterType];
+// Function to get character introduction message (for first-time interactions)
+export function getCharacterIntroduction(character: Character): CharacterResponse {
+  const templates = INTRODUCTION_TEMPLATES[character.id as CharacterType];
+
+  if (!templates || templates.length === 0) {
+    // Fallback if templates not found
+    return {
+      text: `Hi! I'm ${character.name}. I'm here to support you. How can I help today?`,
+      category: "supportive"
+    };
+  }
+
+  const currentTime = getTimeOfDay();
+
+  // Filter templates by time of day if specified, otherwise use all templates
+  const timeFilteredTemplates = templates.filter(template =>
+    !template.timeOfDay || template.timeOfDay === currentTime
+  );
+
+  // If no time-filtered templates available, use all templates
+  const availableTemplates = timeFilteredTemplates.length > 0 ? timeFilteredTemplates : templates;
+
+  // Randomly select one template
+  const randomIndex = Math.floor(Math.random() * availableTemplates.length);
+  return availableTemplates[randomIndex];
 }

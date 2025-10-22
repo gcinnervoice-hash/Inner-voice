@@ -1,29 +1,48 @@
-import { Settings, PanelLeftClose, PanelLeft } from "lucide-react";
+import { Settings, PanelLeftClose, PanelLeft, Calendar, PenLine, Sparkles } from "lucide-react";
+import { useNavigate } from "react-router-dom";
+import { useState } from "react";
 import { Character, CharacterType } from "../types/Character";
 import { SwitchRole } from "./SwitchRole";
 import { SettingsPanel } from "./SettingsPanel";
 import { NatureThemeSelector } from "./NatureThemeSelector";
 import { Logo } from "./Logo";
 import { useThemeClasses, useTheme } from "../contexts/ThemeContext";
+import { EmotionCardGallery } from "./EmotionCardGallery";
 
 interface SidebarProps {
   collapsed: boolean;
   onToggleCollapse: () => void;
   currentCharacter?: Character;
   onCharacterChange?: (characterType: CharacterType) => void;
+  onDoneTalking?: () => void;
+  isAnalyzing?: boolean;
+  canAnalyze?: boolean;
+  messageCount?: number;
 }
 
 export function Sidebar({
   collapsed,
   onToggleCollapse,
   currentCharacter,
-  onCharacterChange
+  onCharacterChange,
+  onDoneTalking,
+  isAnalyzing = false,
+  canAnalyze = false,
+  messageCount = 0
 }: SidebarProps) {
   const themeClasses = useThemeClasses();
   const { settings } = useTheme();
+  const navigate = useNavigate();
+
+  // TEMPORARY: Gallery state for testing
+  const [showGallery, setShowGallery] = useState(false);
 
   // Use sidebar-specific styles for consistency
   const sidebarStyles = themeClasses.sidebarStyles;
+
+  const handleJournalClick = () => {
+    navigate('/app/journal');
+  };
 
   if (collapsed) {
     return (
@@ -48,6 +67,50 @@ export function Sidebar({
 
         {/* Nature Theme Selector for Collapsed State */}
         <NatureThemeSelector collapsed={true} />
+
+        {/* Emotion Journal Button - Collapsed */}
+        <div className="px-3 py-2">
+          <button
+            onClick={handleJournalClick}
+            className={`w-full p-2 ${sidebarStyles.buttonBg} rounded-lg border ${sidebarStyles.border} transition-all duration-200 hover:scale-[1.02] shadow-sm hover:shadow-md`}
+            title="Emotion Journal"
+          >
+            <Calendar className={`w-4 h-4 ${sidebarStyles.textPrimary} mx-auto transition-all duration-200`} />
+          </button>
+        </div>
+
+        {/* TEMPORARY: Card Gallery Button - Collapsed */}
+        <div className="px-3 py-2">
+          <button
+            onClick={() => setShowGallery(true)}
+            className={`w-full p-2 bg-yellow-100 rounded-lg border border-yellow-300 transition-all duration-200 hover:scale-[1.02] shadow-sm hover:shadow-md`}
+            title="Test Card Gallery (TEMPORARY)"
+          >
+            <Sparkles className="w-4 h-4 text-yellow-600 mx-auto transition-all duration-200" />
+          </button>
+        </div>
+
+        {/* Done Talking Button - Collapsed */}
+        {onDoneTalking && (
+          <div className={`px-3 py-2 transition-opacity duration-500 ${canAnalyze ? 'opacity-100' : 'opacity-30 pointer-events-none'}`}>
+            <button
+              onClick={onDoneTalking}
+              disabled={!canAnalyze || isAnalyzing}
+              className={`w-full p-2 rounded-lg border transition-all duration-200 ${
+                canAnalyze && !isAnalyzing
+                  ? `${sidebarStyles.buttonBg} ${sidebarStyles.border} hover:scale-[1.02] shadow-sm hover:shadow-md`
+                  : 'bg-gray-100 border-gray-300 cursor-not-allowed'
+              }`}
+              title={canAnalyze ? 'Done Talking - Create Emotion Card' : 'Start a conversation first'}
+            >
+              {isAnalyzing ? (
+                <div className="w-4 h-4 border-2 border-purple-500 border-t-transparent rounded-full animate-spin mx-auto" />
+              ) : (
+                <PenLine className={`w-4 h-4 mx-auto transition-all duration-200 ${canAnalyze ? sidebarStyles.textPrimary : 'text-gray-400'}`} />
+              )}
+            </button>
+          </div>
+        )}
 
         {/* Settings Panel for Collapsed State */}
         <SettingsPanel
@@ -99,6 +162,77 @@ export function Sidebar({
         <NatureThemeSelector collapsed={false} />
       </div>
 
+      {/* Emotion Journal Button - Expanded */}
+      <div className="px-4 py-3">
+        <div className={`rounded-xl shadow-lg backdrop-blur-sm border transition-all duration-300 ${themeClasses.settingsPanelBg}`}>
+          <button
+            onClick={handleJournalClick}
+            className={`w-full flex items-center justify-between p-3 ${sidebarStyles.buttonBg} hover:scale-[1.02] transition-all duration-200 shadow-sm hover:shadow-md rounded-xl`}
+            title="View your emotion journal"
+          >
+            <div className="flex items-center gap-2">
+              <Calendar className={`w-4 h-4 ${sidebarStyles.textPrimary} transition-all duration-200`} />
+              <span className={`font-character font-bold transition-all duration-200 ${sidebarStyles.textPrimary} ${sidebarStyles.fontHeading}`}>
+                Emotion Journal
+              </span>
+            </div>
+          </button>
+        </div>
+      </div>
+
+      {/* TEMPORARY: Card Gallery Button - Expanded */}
+      <div className="px-4 py-3">
+        <div className="rounded-xl shadow-lg backdrop-blur-sm border-2 border-yellow-300 bg-yellow-50/80">
+          <button
+            onClick={() => setShowGallery(true)}
+            className="w-full flex items-center justify-between p-3 bg-yellow-100 hover:bg-yellow-200 hover:scale-[1.02] transition-all duration-200 shadow-sm hover:shadow-md rounded-xl"
+            title="Test emotion card designs"
+          >
+            <div className="flex items-center gap-2">
+              <Sparkles className="w-4 h-4 text-yellow-600 transition-all duration-200" />
+              <span className="font-character font-bold transition-all duration-200 text-yellow-700 text-sm">
+                Card Gallery (TEST)
+              </span>
+            </div>
+            <span className="text-xs text-yellow-600 font-semibold">TEMP</span>
+          </button>
+        </div>
+      </div>
+
+      {/* Done Talking Button - Expanded */}
+      {onDoneTalking && (
+        <div className={`px-4 py-3 transition-opacity duration-500 ${canAnalyze ? 'opacity-100' : 'opacity-30'}`}>
+          <div className={`rounded-xl shadow-lg backdrop-blur-sm border transition-all duration-300 ${themeClasses.settingsPanelBg}`}>
+            <button
+              onClick={onDoneTalking}
+              disabled={!canAnalyze || isAnalyzing}
+              className={`w-full flex items-center justify-between p-3 rounded-xl transition-all duration-200 ${
+                canAnalyze && !isAnalyzing
+                  ? `${sidebarStyles.buttonBg} hover:scale-[1.02] shadow-sm hover:shadow-md`
+                  : 'bg-gray-100 cursor-not-allowed'
+              }`}
+              title={canAnalyze ? `Create emotion card from ${messageCount} messages` : 'Start a conversation first'}
+            >
+              <div className="flex items-center gap-2">
+                {isAnalyzing ? (
+                  <div className="w-4 h-4 border-2 border-purple-500 border-t-transparent rounded-full animate-spin" />
+                ) : (
+                  <PenLine className={`w-4 h-4 transition-all duration-200 ${canAnalyze ? sidebarStyles.textPrimary : 'text-gray-400'}`} />
+                )}
+                <span className={`font-character font-bold transition-all duration-200 ${canAnalyze ? sidebarStyles.textPrimary : 'text-gray-400'} ${sidebarStyles.fontHeading}`}>
+                  {isAnalyzing ? 'Analyzing...' : 'Done Talking'}
+                </span>
+              </div>
+              {canAnalyze && !isAnalyzing && messageCount > 0 && (
+                <span className={`text-xs ${sidebarStyles.textSecondary}`}>
+                  {messageCount} msgs
+                </span>
+              )}
+            </button>
+          </div>
+        </div>
+      )}
+
       {/* Settings Panel for Expanded State */}
       <div className="mt-auto">
         <SettingsPanel
@@ -106,6 +240,11 @@ export function Sidebar({
           collapsed={false}
         />
       </div>
+
+      {/* TEMPORARY: Emotion Card Gallery Modal */}
+      {showGallery && (
+        <EmotionCardGallery onClose={() => setShowGallery(false)} />
+      )}
     </div>
   );
 }
