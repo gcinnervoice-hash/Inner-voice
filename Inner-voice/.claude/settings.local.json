@@ -1,0 +1,18 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(npm run build:*)",
+      "WebSearch",
+      "Bash(npm install:*)",
+      "Bash(node:*)",
+      "Bash(npm run type-check:*)",
+      "Bash(wsl grep:*)",
+      "Bash(move .dockerignore docker.dockerignore)",
+      "Bash(move .env.docker.example docker.env.example)",
+      "Bash(move DOCKER.md dockerREADME.md)"
+    ],
+    "deny": [],
+    "ask": []
+  },
+  "outputStyle": "default"
+}

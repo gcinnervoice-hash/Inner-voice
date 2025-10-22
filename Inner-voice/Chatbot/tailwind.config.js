@@ -7,7 +7,70 @@ export default {
   theme: {
     extend: {
       colors: {
-        // Nature theme colors
+        // Brand colors inspired by chatbot's green theme
+        brand: {
+          50: '#e5e8e5',
+          100: '#dcf2dc',
+          200: '#bce5bc',
+          300: '#8fbc8f',
+          400: '#4d767e',
+          500: '#6b9b6b',
+          600: '#5a8a5a',
+          700: '#4a7a4a',
+          800: '#3d653d',
+          900: '#335533',
+        },
+        // Character-specific colors from chatbot
+        daisy: {
+          50: '#fdf2f8',
+          100: '#fce7f3',
+          200: '#fbcfe8',
+          300: '#f8b4d6',
+          400: '#f472b6',
+          500: '#ec4899',
+          600: '#db2777',
+          700: '#be185d',
+          800: '#9d174d',
+          900: '#831843',
+        },
+        luna: {
+          50: '#faf5ff',
+          100: '#f3e8ff',
+          200: '#e9d5ff',
+          300: '#d8b4fe',
+          400: '#c084fc',
+          500: '#a855f7',
+          600: '#9333ea',
+          700: '#7c3aed',
+          800: '#6b21a8',
+          900: '#581c87',
+        },
+        zara: {
+          50: '#fff7ed',
+          100: '#ffedd5',
+          200: '#fed7aa',
+          300: '#fdba74',
+          400: '#fb923c',
+          500: '#f97316',
+          600: '#ea580c',
+          700: '#c2410c',
+          800: '#9a3412',
+          900: '#7c2d12',
+        },
+        // Complementary colors for marketing site
+        accent: {
+          50: '#f0f9ff',
+          100: '#e0f2fe',
+          200: '#bae6fd',
+          300: '#7dd3fc',
+          400: '#38bdf8',
+          500: '#0ea5e9',
+          600: '#0284c7',
+          700: '#0369a1',
+          800: '#075985',
+          900: '#0c4a6e',
+        },
+        // Nature theme colors (keep for chatbot interface)
         forest: {
           50: '#f0fdf4',
           100: '#dcfce7',
@@ -34,19 +97,15 @@ export default {
           900: '#0f172a',
           950: '#020617',
         },
-        plain: {
-          50: '#fffbeb',
-          100: '#fef3c7',
-          200: '#fde68a',
-          300: '#fcd34d',
-          400: '#fbbf24',
-          500: '#f59e0b',
-          600: '#d97706',
-          700: '#b45309',
-          800: '#92400e',
-          900: '#78350f',
-          950: '#451a03',
-        },
+      },
+      backgroundImage: {
+        'gradient-radial': 'radial-gradient(var(--tw-gradient-stops))',
+        'brand-gradient': 'linear-gradient(135deg, #a8d5a8 0%, #8fbc8f 50%, #7aa87a 100%)',
+        'hero-gradient': 'linear-gradient(135deg, #fffbeb 0%, #fef3c7 50%, #fde68a 100%)',
+        'daisy-gradient': 'linear-gradient(135deg, #fce7f3 0%, #fbcfe8 100%)',
+        'luna-gradient': 'linear-gradient(135deg, #f3e8ff 0%, #e9d5ff 100%)',
+        'zara-gradient': 'linear-gradient(135deg, #ffedd5 0%, #fed7aa 100%)',
+        'character-showcase': 'linear-gradient(135deg, #f9fafb 0%, #f3f4f6 50%, #e5e7eb 100%)',
       },
       fontFamily: {
         character: ['Varela Round', 'ui-sans-serif', 'system-ui', 'sans-serif'],
@@ -61,11 +120,18 @@ export default {
         'button': 'var(--font-button)',
       },
       animation: {
+        'float': 'float 6s ease-in-out infinite',
+        'pulse-slow': 'pulse 3s ease-in-out infinite',
         'bounce-slow': 'bounce 1.5s infinite',
         'fade-in': 'fadeIn 0.5s ease-in-out',
         'slide-in': 'slideIn 0.3s ease-out',
+        'slide-up': 'slideUp 0.5s ease-out',
       },
       keyframes: {
+        float: {
+          '0%, 100%': { transform: 'translateY(0px)' },
+          '50%': { transform: 'translateY(-10px)' },
+        },
         fadeIn: {
           '0%': { opacity: '0' },
           '100%': { opacity: '1' },
@@ -73,6 +139,10 @@ export default {
         slideIn: {
           '0%': { transform: 'translateY(10px)', opacity: '0' },
           '100%': { transform: 'translateY(0)', opacity: '1' },
+        },
+        slideUp: {
+          '0%': { transform: 'translateY(20px)', opacity: '0' },
+          '100%': { transform: 'translateY(0px)', opacity: '1' },
         },
       },
       backdropBlur: {

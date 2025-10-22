@@ -1,13 +1,11 @@
-import { Settings, PanelLeftClose, PanelLeft, Calendar, PenLine, Sparkles } from "lucide-react";
+import { Settings, PanelLeftClose, PanelLeft, Calendar, PenLine } from "lucide-react";
 import { useNavigate } from "react-router-dom";
-import { useState } from "react";
 import { Character, CharacterType } from "../types/Character";
 import { SwitchRole } from "./SwitchRole";
 import { SettingsPanel } from "./SettingsPanel";
 import { NatureThemeSelector } from "./NatureThemeSelector";
 import { Logo } from "./Logo";
 import { useThemeClasses, useTheme } from "../contexts/ThemeContext";
-import { EmotionCardGallery } from "./EmotionCardGallery";
 
 interface SidebarProps {
   collapsed: boolean;
@@ -33,9 +31,6 @@ export function Sidebar({
   const themeClasses = useThemeClasses();
   const { settings } = useTheme();
   const navigate = useNavigate();
-
-  // TEMPORARY: Gallery state for testing
-  const [showGallery, setShowGallery] = useState(false);
 
   // Use sidebar-specific styles for consistency
   const sidebarStyles = themeClasses.sidebarStyles;
@@ -76,17 +71,6 @@ export function Sidebar({
             title="Emotion Journal"
           >
             <Calendar className={`w-4 h-4 ${sidebarStyles.textPrimary} mx-auto transition-all duration-200`} />
-          </button>
-        </div>
-
-        {/* TEMPORARY: Card Gallery Button - Collapsed */}
-        <div className="px-3 py-2">
-          <button
-            onClick={() => setShowGallery(true)}
-            className={`w-full p-2 bg-yellow-100 rounded-lg border border-yellow-300 transition-all duration-200 hover:scale-[1.02] shadow-sm hover:shadow-md`}
-            title="Test Card Gallery (TEMPORARY)"
-          >
-            <Sparkles className="w-4 h-4 text-yellow-600 mx-auto transition-all duration-200" />
           </button>
         </div>
 
@@ -180,25 +164,6 @@ export function Sidebar({
         </div>
       </div>
 
-      {/* TEMPORARY: Card Gallery Button - Expanded */}
-      <div className="px-4 py-3">
-        <div className="rounded-xl shadow-lg backdrop-blur-sm border-2 border-yellow-300 bg-yellow-50/80">
-          <button
-            onClick={() => setShowGallery(true)}
-            className="w-full flex items-center justify-between p-3 bg-yellow-100 hover:bg-yellow-200 hover:scale-[1.02] transition-all duration-200 shadow-sm hover:shadow-md rounded-xl"
-            title="Test emotion card designs"
-          >
-            <div className="flex items-center gap-2">
-              <Sparkles className="w-4 h-4 text-yellow-600 transition-all duration-200" />
-              <span className="font-character font-bold transition-all duration-200 text-yellow-700 text-sm">
-                Card Gallery (TEST)
-              </span>
-            </div>
-            <span className="text-xs text-yellow-600 font-semibold">TEMP</span>
-          </button>
-        </div>
-      </div>
-
       {/* Done Talking Button - Expanded */}
       {onDoneTalking && (
         <div className={`px-4 py-3 transition-opacity duration-500 ${canAnalyze ? 'opacity-100' : 'opacity-30'}`}>
@@ -240,11 +205,6 @@ export function Sidebar({
           collapsed={false}
         />
       </div>
-
-      {/* TEMPORARY: Emotion Card Gallery Modal */}
-      {showGallery && (
-        <EmotionCardGallery onClose={() => setShowGallery(false)} />
-      )}
     </div>
   );
 }

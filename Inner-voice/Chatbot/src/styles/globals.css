@@ -21,14 +21,6 @@
     @apply bg-white/90 hover:bg-white text-brand-700 font-semibold py-3 px-8 rounded-xl transition-all duration-300 shadow-md hover:shadow-lg hover:scale-105 active:scale-95;
   }
 
-  .btn-outline {
-    @apply border-2 border-white/30 hover:border-white/50 text-white font-semibold py-3 px-8 rounded-xl transition-all duration-300 backdrop-blur-sm hover:backdrop-blur-md hover:bg-white/10 hover:scale-105 active:scale-95;
-  }
-
-  .btn-ghost {
-    @apply text-gray-700 hover:text-brand-600 hover:bg-brand-50 font-semibold py-2 px-6 rounded-lg transition-all duration-200;
-  }
-
   /* Typography */
   .heading-xl {
     @apply text-5xl md:text-6xl lg:text-7xl font-bold leading-none tracking-tight;
@@ -36,10 +28,6 @@
 
   .heading-lg {
     @apply text-4xl md:text-5xl lg:text-6xl font-bold leading-tight tracking-tight;
-  }
-
-  .heading-md {
-    @apply text-3xl md:text-4xl lg:text-5xl font-bold leading-tight;
   }
 
   .heading-sm {
@@ -57,10 +45,6 @@
   /* Card Components */
   .feature-card {
     @apply glass-strong p-8 rounded-2xl hover:bg-white/30 transition-all duration-300 hover:scale-105 hover:shadow-2xl cursor-pointer;
-  }
-
-  .character-card {
-    @apply glass p-6 rounded-3xl hover:bg-white/25 transition-all duration-300 hover:scale-105 hover:shadow-xl;
   }
 
   /* Layout Utilities */
@@ -91,24 +75,6 @@
 
   .gradient-text-zara {
     @apply bg-clip-text text-transparent bg-zara-gradient;
-  }
-
-  /* Floating Elements */
-  .floating-element {
-    @apply animate-float;
-  }
-
-  /* Banner Styles */
-  .alert-banner {
-    @apply glass-strong border-2 border-amber-300/50 bg-amber-50/50 rounded-2xl p-6 shadow-lg;
-  }
-
-  .success-banner {
-    @apply glass-strong border-2 border-green-300/50 bg-green-50/50 rounded-2xl p-6 shadow-lg;
-  }
-
-  .info-banner {
-    @apply glass-strong border-2 border-blue-300/50 bg-blue-50/50 rounded-2xl p-6 shadow-lg;
   }
 
   /* Navigation */
