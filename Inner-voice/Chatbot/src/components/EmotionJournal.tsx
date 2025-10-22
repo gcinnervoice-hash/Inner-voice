@@ -55,6 +55,13 @@ export const EmotionJournal: React.FC = () => {
     offset: 0
   });
 
+  // Filter UI State
+  const [filterStartDate, setFilterStartDate] = useState<string>('');
+  const [filterEndDate, setFilterEndDate] = useState<string>('');
+  const [filterEmotion, setFilterEmotion] = useState<string>('');
+  const [filterCharacter, setFilterCharacter] = useState<string>('');
+  const [filterTags, setFilterTags] = useState<string[]>([]);
+
   // Load emotion cards when filters change
   useEffect(() => {
     loadCards();
@@ -99,6 +106,50 @@ export const EmotionJournal: React.FC = () => {
     } finally {
       setIsLoadingStats(false);
     }
+  };
+
+  const handleApplyFilters = () => {
+    const newFilters: GetEmotionCardsFilters = {
+      limit: 50,
+      offset: 0
+    };
+
+    if (filterStartDate) {
+      newFilters.startDate = new Date(filterStartDate);
+    }
+    if (filterEndDate) {
+      newFilters.endDate = new Date(filterEndDate);
+    }
+    if (filterEmotion && filterEmotion !== '') {
+      newFilters.emotion = filterEmotion as any;
+    }
+    if (filterCharacter && filterCharacter !== '') {
+      newFilters.character = filterCharacter as any;
+    }
+    if (filterTags.length > 0) {
+      newFilters.tags = filterTags;
+    }
+
+    setFilters(newFilters);
+    setShowFilters(false);
+  };
+
+  const handleClearFilters = () => {
+    setFilterStartDate('');
+    setFilterEndDate('');
+    setFilterEmotion('');
+    setFilterCharacter('');
+    setFilterTags([]);
+    setFilters({ limit: 50, offset: 0 });
+    setShowFilters(false);
+  };
+
+  const toggleFilterTag = (tag: string) => {
+    setFilterTags(prev =>
+      prev.includes(tag)
+        ? prev.filter(t => t !== tag)
+        : [...prev, tag]
+    );
   };
 
   const handleCardClick = (card: EmotionCardType) => {
@@ -404,32 +455,153 @@ export const EmotionJournal: React.FC = () => {
         {/* Filters Panel */}
         {showFilters && (
           <div className={`mb-8 ${cardBgClasses} rounded-2xl p-6 shadow-lg border-2 backdrop-blur-sm`}>
-            <h3 className="text-lg font-bold mb-4">Filter Emotion Cards</h3>
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-              {/* Emotion filter placeholder - can be expanded */}
+            <h3 className="text-lg font-bold mb-6">Filter Emotion Cards</h3>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
+              {/* Date Range */}
+              <div>
+                <label className={`block text-sm font-semibold ${isForestTheme ? 'text-emerald-100' : 'text-gray-700'} mb-2`}>
+                  Start Date
+                </label>
+                <input
+                  type="date"
+                  value={filterStartDate}
+                  onChange={(e) => setFilterStartDate(e.target.value)}
+                  className={`w-full px-4 py-2 rounded-xl border-2 ${
+                    isForestTheme
+                      ? 'border-emerald-700 bg-emerald-900/50 text-white focus:border-emerald-500'
+                      : 'border-gray-200 bg-white text-gray-900 focus:border-purple-400'
+                  } focus:outline-none transition-colors`}
+                />
+              </div>
+
+              <div>
+                <label className={`block text-sm font-semibold ${isForestTheme ? 'text-emerald-100' : 'text-gray-700'} mb-2`}>
+                  End Date
+                </label>
+                <input
+                  type="date"
+                  value={filterEndDate}
+                  onChange={(e) => setFilterEndDate(e.target.value)}
+                  className={`w-full px-4 py-2 rounded-xl border-2 ${
+                    isForestTheme
+                      ? 'border-emerald-700 bg-emerald-900/50 text-white focus:border-emerald-500'
+                      : 'border-gray-200 bg-white text-gray-900 focus:border-purple-400'
+                  } focus:outline-none transition-colors`}
+                />
+              </div>
+
+              {/* Emotion Type */}
               <div>
                 <label className={`block text-sm font-semibold ${isForestTheme ? 'text-emerald-100' : 'text-gray-700'} mb-2`}>
                   Emotion Type
                 </label>
-                <select className={`w-full px-4 py-2 rounded-xl border-2 ${
-                  isForestTheme
-                    ? 'border-emerald-700 bg-emerald-900/50 text-white focus:border-emerald-500'
-                    : 'border-gray-200 bg-white text-gray-900 focus:border-purple-400'
-                } focus:outline-none transition-colors`}>
-                  <option>All Emotions</option>
+                <select
+                  value={filterEmotion}
+                  onChange={(e) => setFilterEmotion(e.target.value)}
+                  className={`w-full px-4 py-2 rounded-xl border-2 ${
+                    isForestTheme
+                      ? 'border-emerald-700 bg-emerald-900/50 text-white focus:border-emerald-500'
+                      : 'border-gray-200 bg-white text-gray-900 focus:border-purple-400'
+                  } focus:outline-none transition-colors`}
+                >
+                  <option value="">All Emotions</option>
+                  <option value="joy">Joy</option>
+                  <option value="gratitude">Gratitude</option>
+                  <option value="pride">Pride</option>
+                  <option value="excitement">Excitement</option>
+                  <option value="contentment">Contentment</option>
+                  <option value="hope">Hope</option>
+                  <option value="relief">Relief</option>
+                  <option value="love">Love</option>
+                  <option value="anxiety">Anxiety</option>
+                  <option value="sadness">Sadness</option>
+                  <option value="anger">Anger</option>
+                  <option value="loneliness">Loneliness</option>
+                  <option value="exhaustion">Exhaustion</option>
+                  <option value="stress">Stress</option>
+                  <option value="hurt">Hurt</option>
+                  <option value="fear">Fear</option>
+                  <option value="frustration">Frustration</option>
+                  <option value="disappointment">Disappointment</option>
+                  <option value="guilt">Guilt</option>
+                  <option value="shame">Shame</option>
+                  <option value="bittersweet">Bittersweet</option>
+                  <option value="nostalgic">Nostalgic</option>
+                  <option value="conflicted">Conflicted</option>
+                  <option value="overwhelmed">Overwhelmed</option>
                 </select>
               </div>
-              <div className="flex items-end">
-                <button
-                  onClick={() => {
-                    setFilters({ limit: 50, offset: 0 });
-                    setShowFilters(false);
-                  }}
-                  className={`w-full px-4 py-2 rounded-xl font-semibold transition-colors ${isForestTheme ? 'bg-emerald-700 hover:bg-emerald-600 text-white' : 'bg-gray-100 text-gray-700 hover:bg-gray-200'}`}
+
+              {/* Character */}
+              <div>
+                <label className={`block text-sm font-semibold ${isForestTheme ? 'text-emerald-100' : 'text-gray-700'} mb-2`}>
+                  Character
+                </label>
+                <select
+                  value={filterCharacter}
+                  onChange={(e) => setFilterCharacter(e.target.value)}
+                  className={`w-full px-4 py-2 rounded-xl border-2 ${
+                    isForestTheme
+                      ? 'border-emerald-700 bg-emerald-900/50 text-white focus:border-emerald-500'
+                      : 'border-gray-200 bg-white text-gray-900 focus:border-purple-400'
+                  } focus:outline-none transition-colors`}
                 >
-                  Clear Filters
-                </button>
+                  <option value="">All Characters</option>
+                  <option value="sheep">Daisy (Sheep)</option>
+                  <option value="rabbit">Luna (Rabbit)</option>
+                  <option value="fox">Zara (Fox)</option>
+                </select>
               </div>
+            </div>
+
+            {/* Tags Filter */}
+            <div className="mb-6">
+              <label className={`block text-sm font-semibold ${isForestTheme ? 'text-emerald-100' : 'text-gray-700'} mb-3`}>
+                Tags
+              </label>
+              <div className="grid grid-cols-2 md:grid-cols-5 gap-2">
+                {['work', 'relationships', 'health', 'family', 'future', 'self', 'money', 'social', 'creative', 'academic'].map(tag => (
+                  <button
+                    key={tag}
+                    onClick={() => toggleFilterTag(tag)}
+                    className={`px-3 py-2 rounded-lg font-medium text-sm transition-colors ${
+                      filterTags.includes(tag)
+                        ? isForestTheme
+                          ? 'bg-emerald-600 text-white border-2 border-emerald-400'
+                          : 'bg-purple-600 text-white border-2 border-purple-400'
+                        : isForestTheme
+                        ? 'bg-emerald-900/30 text-emerald-200 border-2 border-emerald-700 hover:bg-emerald-900/50'
+                        : 'bg-gray-100 text-gray-700 border-2 border-gray-200 hover:bg-gray-200'
+                    }`}
+                  >
+                    {tag.charAt(0).toUpperCase() + tag.slice(1)}
+                  </button>
+                ))}
+              </div>
+            </div>
+
+            {/* Action Buttons */}
+            <div className="flex gap-3">
+              <button
+                onClick={handleApplyFilters}
+                className={`flex-1 px-4 py-3 rounded-xl font-semibold transition-colors ${
+                  isForestTheme
+                    ? 'bg-emerald-600 hover:bg-emerald-500 text-white'
+                    : 'bg-purple-600 hover:bg-purple-500 text-white'
+                }`}
+              >
+                Apply Filters
+              </button>
+              <button
+                onClick={handleClearFilters}
+                className={`flex-1 px-4 py-3 rounded-xl font-semibold transition-colors ${
+                  isForestTheme
+                    ? 'bg-emerald-900/30 hover:bg-emerald-900/50 text-emerald-200 border-2 border-emerald-700'
+                    : 'bg-gray-100 hover:bg-gray-200 text-gray-700 border-2 border-gray-200'
+                }`}
+              >
+                Clear All
+              </button>
             </div>
           </div>
         )}
