@@ -47,6 +47,7 @@ export const EmotionJournal: React.FC = () => {
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
   const [viewMode, setViewMode] = useState<ViewMode>('calendar');
   const [currentMonth, setCurrentMonth] = useState(new Date());
+  const [expandedTags, setExpandedTags] = useState(false);
 
   // Filters
   const [filters, setFilters] = useState<GetEmotionCardsFilters>({
@@ -308,17 +309,40 @@ export const EmotionJournal: React.FC = () => {
                     </div>
                   </div>
 
-                  {/* Average Intensity */}
+                  {/* All Tags Toggle */}
                   <div>
-                    <div className={`text-sm font-medium ${isForestTheme ? 'text-emerald-300' : 'text-gray-600'} mb-2`}>
-                      Average Intensity
-                    </div>
-                    <div className={`text-4xl font-bold ${isForestTheme ? 'text-emerald-100' : 'text-purple-600'}`}>
-                      {typeof stats.averageIntensity === 'number' ? stats.averageIntensity.toFixed(1) : '0.0'}/10
-                    </div>
-                    <div className={`text-xs mt-1 ${isForestTheme ? 'text-emerald-400' : 'text-purple-500'}`}>
-                      {stats.totalCards > 0 && stats.averageIntensity > 6 ? '⚠️ Higher intensity' : '✨ Steady'}
-                    </div>
+                    <button
+                      onClick={() => setExpandedTags(!expandedTags)}
+                      className={`text-sm font-medium ${isForestTheme ? 'text-emerald-300' : 'text-gray-600'} hover:opacity-80 transition-opacity flex items-center gap-2 mb-2`}
+                    >
+                      All Tags
+                      <span className={`transition-transform inline-block ${expandedTags ? 'rotate-180' : ''}`}>
+                        ▼
+                      </span>
+                    </button>
+
+                    {expandedTags && stats.mostCommonTags && stats.mostCommonTags.length > 0 ? (
+                      <div className="space-y-2 max-h-48 overflow-y-auto">
+                        {stats.mostCommonTags.map((tagData, idx) => (
+                          <div key={idx} className="flex items-center justify-between">
+                            <span className={`text-sm ${isForestTheme ? 'text-emerald-200' : 'text-gray-700'}`}>
+                              {tagData.tag}
+                            </span>
+                            <span className={`text-xs px-2 py-1 rounded-full font-medium ${isForestTheme ? 'bg-emerald-900 text-emerald-200' : 'bg-purple-100 text-purple-700'}`}>
+                              {tagData.count}
+                            </span>
+                          </div>
+                        ))}
+                      </div>
+                    ) : expandedTags ? (
+                      <div className={`text-sm ${isForestTheme ? 'text-emerald-400' : 'text-gray-500'}`}>
+                        No tags found
+                      </div>
+                    ) : (
+                      <div className={`text-xs ${isForestTheme ? 'text-emerald-400' : 'text-purple-500'}`}>
+                        {stats.mostCommonTags ? stats.mostCommonTags.length : 0} tags available
+                      </div>
+                    )}
                   </div>
 
                   {/* Most Common Tag */}
